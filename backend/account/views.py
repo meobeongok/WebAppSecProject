@@ -12,8 +12,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Member
 from .serializers import MemberSerializer
 
-# Create your views here.
-
 
 class AccountAPIStructure(APIView):
     def get(self, request):
@@ -22,14 +20,13 @@ class AccountAPIStructure(APIView):
                 "login/": "Login (Refresh Token + Access Token)",
                 "register/": "Register",
                 "refreshtoken/": "Get Refresh Token",
-                "logout/": "logout",
-                "profile/": "user info",
+                "logout/": "Logout",
+                "profile/": "User info",
             }
         )
 
 
 class RegistrationView(APIView):
-    # Allow any user (authenticated or not) to hit this endpoint.
     permission_classes = (AllowAny,)
     serializer_class = MemberSerializer
 
@@ -52,9 +49,11 @@ class LogoutView(APIView):
             for token in OutstandingToken.objects.filter(user=request.user):
                 _, _ = BlacklistedToken.objects.get_or_create(token=token)
             return Response({"status": "OK, goodbye, all refresh tokens blacklisted"})
+
         refresh_token = request.data["refresh"]
         refreshtoken = RefreshToken(refresh_token)
         refreshtoken.blacklist()
+
         return Response({"status": "OK, goodbye"})
 
 
@@ -71,18 +70,24 @@ class MemberProfileView(RetrieveUpdateDestroyAPIView):
     def get(self, request):
         userInfo = self.queryset.get(id=request.user.id)
         serializer = MemberSerializer(userInfo)
+
         return Response(serializer.data)
 
     def put(self, request):
         instance = self.queryset.get(id=request.user.id)
         serializer = MemberSerializer(instance=instance, data=request.data)
         serializer.is_valid(raise_exception=True)
-        if not not request.data.get("image", None):
+
+        print(type(request.data.get("image", None)))
+
+        if len(request.data.get("image", None)):
             instance.image.delete()
+
         serializer.save()
         return Response(serializer.data)
 
     def delete(self, request):
         instance = self.queryset.get(id=request.user.id)
         instance.delete()
+
         return Response(status=204)

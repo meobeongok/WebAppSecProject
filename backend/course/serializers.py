@@ -1,9 +1,8 @@
 from rest_framework import serializers
-from .models import *
 from account.models import Member
-from resource.models import File
 from resource.serializers import FileSerializer
 from deadline.serializers import DeadlineSerializer
+from .models import *
 
 
 class LectureSerializer(serializers.ModelSerializer):

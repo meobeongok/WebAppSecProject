@@ -20,8 +20,8 @@ class MemberSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True, "required": False}}
 
     def create(self, validated_data):
-
-        user = Member(email=validated_data["email"], name=validated_data["name"])
-        user.set_password(validated_data["password"])
+        password = validated_data.pop("password")
+        user = Member(**validated_data)
+        user.set_password(password)
         user.save()
         return user

@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -20,11 +20,27 @@ class AccountAPIStructure(APIView):
         return Response(
             {
                 "login/": "Login (Refresh Token + Access Token)",
+                "register/": "Register",
                 "refreshtoken/": "Get Refresh Token",
                 "logout/": "logout",
                 "profile/": "user info",
             }
         )
+
+
+class RegistrationView(APIView):
+    # Allow any user (authenticated or not) to hit this endpoint.
+    permission_classes = (AllowAny,)
+    serializer_class = MemberSerializer
+
+    def post(self, request):
+        user = request.data
+
+        serializer = self.serializer_class(data=user)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class LogoutView(APIView):

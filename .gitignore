@@ -1,0 +1,42 @@
+.vs
+.vscode
+!frontend/.vscode
+*.local
+
+### Django ###
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media
+backend/img/*
+backend/*/migrations/*
+!backend/*/migrations/__init__.py
+
+# Environments
+.venv
+
+### Nextjs ###
+# dependencies
+node_modules
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# production
+build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+.pnpm-debug.log*
+
+# typescript
+*.tsbuildinfo

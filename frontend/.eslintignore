@@ -1,0 +1,7 @@
+.next/**
+build/**
+out/**
+public/**
+next.config.js
+next-env.d.ts
+pnpm-lock.yaml

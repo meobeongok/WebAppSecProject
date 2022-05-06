@@ -40,7 +40,7 @@ class MemberManager(BaseUserManager):
 
 
 class Member(AbstractBaseUser, PermissionsMixin):
-    def get_upload_path(self, instance, filename):
+    def get_upload_path(instance, filename):
         parts = filename.split(".")
         image_id = uuid.uuid4().hex
         return f'img/{"".join(parts[:-1])}-{image_id}.{parts[-1]}'

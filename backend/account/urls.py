@@ -1,12 +1,18 @@
 from django.urls import path
-from rest_framework_simplejwt import views as jwt_views
-from .views import AccountAPIStructure, LogoutView, MemberProfileView, RegistrationView
+from .views import (
+    RegisterView,
+    MemberAPIStructure,
+    CookieTokenObtainPairView,
+    CookieTokenRefreshView,
+    SignOutView,
+    MemberProfileView,
+)
 
 urlpatterns = [
-    path("", AccountAPIStructure.as_view(), name="structure"),
-    path("login/", jwt_views.TokenObtainPairView.as_view(), name="login"),
-    path("register/", RegistrationView.as_view(), name="register"),
-    path("refreshtoken/", jwt_views.TokenRefreshView.as_view(), name="refresh_token"),
-    path("logout/", LogoutView.as_view(), name="logout"),
-    path("profile/", MemberProfileView.as_view()),
+    path("", MemberAPIStructure.as_view(), name="structure"),
+    path("signin/", CookieTokenObtainPairView.as_view(), name="signin"),
+    path("signout/", SignOutView.as_view(), name="signout"),
+    path("register/", RegisterView.as_view(), name="register"),
+    path("refreshtoken/", CookieTokenRefreshView.as_view(), name="refresh_token"),
+    path("profile/", MemberProfileView.as_view(), name="profile"),
 ]

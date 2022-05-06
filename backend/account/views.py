@@ -1,34 +1,38 @@
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.generics import RetrieveUpdateDestroyAPIView
-from rest_framework.response import Response
+from django.conf import settings
 from rest_framework import status
-from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
-from rest_framework_simplejwt.token_blacklist.models import (
-    BlacklistedToken,
-    OutstandingToken,
-)
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+from .serializers import (
+    CookieTokenRefreshSerializer,
+    RegisterSerializer,
+    MemberSerializer,
+)
 from .models import Member
-from .serializers import MemberSerializer
 
 
-class AccountAPIStructure(APIView):
-    def get(self, request):
+class MemberAPIStructure(APIView):
+    @staticmethod
+    def get(request):
         return Response(
             {
-                "login/": "Login (Refresh Token + Access Token)",
+                "signin/": "Sign in (Refresh Token + Access Token)",
+                "signout/": "Sign out",
                 "register/": "Register",
                 "refreshtoken/": "Get Refresh Token",
-                "logout/": "Logout",
                 "profile/": "User info",
             }
         )
 
 
-class RegistrationView(APIView):
+class RegisterView(APIView):
     permission_classes = (AllowAny,)
-    serializer_class = MemberSerializer
+    serializer_class = RegisterSerializer
 
     def post(self, request):
         user = request.data
@@ -40,21 +44,56 @@ class RegistrationView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class LogoutView(APIView):
+class CookieTokenObtainPairView(TokenObtainPairView):
+    def finalize_response(self, request, response, *args, **kwargs):
+        if response.data.get(
+            "refresh",
+        ):
+            cookie_max_age = 3600 * 24
+            response.set_cookie(
+                "refresh_token",
+                response.data["refresh"],
+                max_age=cookie_max_age,
+                httponly=settings.HTTP_ONLY_COOKIE,
+                samesite=settings.SAME_SITE,
+            )
+            del response.data["refresh"]
+
+        return super().finalize_response(request, response, *args, **kwargs)
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    def finalize_response(self, request, response, *args, **kwargs):
+        if response.data.get(
+            "refresh",
+        ):
+            cookie_max_age = 3600 * 24
+            response.set_cookie(
+                "refresh_token",
+                response.data["refresh"],
+                max_age=cookie_max_age,
+                httponly=settings.HTTP_ONLY_COOKIE,
+                samesite=settings.SAME_SITE,
+            )
+            del response.data["refresh"]
+
+        return super().finalize_response(request, response, *args, **kwargs)
+
+    serializer_class = CookieTokenRefreshSerializer
+
+
+class SignOutView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
-        if self.request.data.get("all"):
-            token: OutstandingToken
-            for token in OutstandingToken.objects.filter(user=request.user):
-                _, _ = BlacklistedToken.objects.get_or_create(token=token)
-            return Response({"status": "OK, goodbye, all refresh tokens blacklisted"})
+    @staticmethod
+    def post(request):
+        user_refresh_token = request.COOKIES["refresh_token"]
+        refresh_token = RefreshToken(user_refresh_token)
+        refresh_token.blacklist()
 
-        refresh_token = request.data["refresh"]
-        refreshtoken = RefreshToken(refresh_token)
-        refreshtoken.blacklist()
-
-        return Response({"status": "OK, goodbye"})
+        response = Response({"status": "OK, goodbye"})
+        response.delete_cookie("refresh_token")
+        return response
 
 
 class MemberProfileView(RetrieveUpdateDestroyAPIView):
@@ -67,27 +106,24 @@ class MemberProfileView(RetrieveUpdateDestroyAPIView):
         JSONParser,
     )
 
-    def get(self, request):
-        userInfo = self.queryset.get(id=request.user.id)
-        serializer = MemberSerializer(userInfo)
+    def get(self, request, **kwargs):
+        print(request.user.id)
+        user_info = self.queryset.get(id=request.user.id)
+        serializer = MemberSerializer(user_info)
 
         return Response(serializer.data)
 
-    def put(self, request):
+    def put(self, request, **kwargs):
         instance = self.queryset.get(id=request.user.id)
-        serializer = MemberSerializer(instance=instance, data=request.data)
+        serializer = self.serializer_class(instance=instance, data=request.data)
+
         serializer.is_valid(raise_exception=True)
-
-        print(type(request.data.get("image", None)))
-
-        if len(request.data.get("image", None)):
-            instance.image.delete()
 
         serializer.save()
         return Response(serializer.data)
 
-    def delete(self, request):
+    def delete(self, request, **kwargs):
         instance = self.queryset.get(id=request.user.id)
         instance.delete()
 
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)

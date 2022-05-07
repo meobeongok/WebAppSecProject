@@ -1,6 +1,7 @@
 const api = {
-  signin: '/account/signin/',
-  refresh: '/account/refreshtoken/'
+  signIn: '/account/signin/',
+  refresh: '/account/refreshtoken/',
+  signUp: '/account/register/'
 }
 
 export { api }

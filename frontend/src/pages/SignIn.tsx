@@ -51,6 +51,7 @@ const useStyles = createStyles((theme) => ({
 
   signInButton: {
     marginTop: '0.75rem',
+    fontWeight: 400,
     fontSize: theme.fontSizes.md
   }
 }))
@@ -60,7 +61,6 @@ function Login(): JSX.Element {
 
   const navigate = useNavigate()
   const location = useLocation()
-  const { from } = location.state as { from: string }
 
   const axiosInstance = useAxiosInstance()
   const setAccessToken = useTokenStore((state) => state.setAccessToken)
@@ -84,11 +84,16 @@ function Login(): JSX.Element {
     const { hasErrors } = form.validate()
     if (hasErrors) return
 
-    const data = await axiosInstance.post<TokenPayload>(api.signin, form.values).then(({ data }) => data)
+    const data = await axiosInstance.post<TokenPayload>(api.signIn, form.values).then(({ data }) => data)
 
     setAccessToken(data.access)
 
-    navigate(from ?? '/', { replace: true })
+    if (location.state && Object.keys(location.state as { from: string }).find((key) => key === 'from')) {
+      const { from } = location.state as { from: string }
+      navigate(from, { replace: true })
+    } else {
+      navigate('/', { replace: true })
+    }
   }
 
   return (

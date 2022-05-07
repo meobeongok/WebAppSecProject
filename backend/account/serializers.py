@@ -62,6 +62,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         write_only=True, required=True, validators=[validate_password]
     )
 
+    comfirm_password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
+
     class Meta:
         model = Member
 
@@ -71,6 +75,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             "email",
             "name",
             "password",
+            "comfirm_password",
             "image",
             "gender",
             "is_lecturer",
@@ -86,7 +91,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = Member(**validated_data)
         user.set_password(password)
         user.save()
-        return user
+        return (user,)
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["comfirm_password"]:
+            raise serializers.ValidationError(
+                {"password": "Password fields didn't match."}
+            )
+
+        attrs.pop("comfirm_password")
+
+        return attrs
 
 
 class CookieTokenRefreshSerializer(TokenRefreshSerializer):

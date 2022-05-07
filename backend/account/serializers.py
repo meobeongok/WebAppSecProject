@@ -62,7 +62,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         write_only=True, required=True, validators=[validate_password]
     )
 
-    comfirm_password = serializers.CharField(
+    confirm_password = serializers.CharField(
         write_only=True, required=True, validators=[validate_password]
     )
 
@@ -75,7 +75,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             "email",
             "name",
             "password",
-            "comfirm_password",
+            "confirm_password",
             "image",
             "gender",
             "is_lecturer",
@@ -94,12 +94,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         return (user,)
 
     def validate(self, attrs):
-        if attrs["password"] != attrs["comfirm_password"]:
+        if attrs["password"] != attrs["confirm_password"]:
             raise serializers.ValidationError(
                 {"password": "Password fields didn't match."}
             )
 
-        attrs.pop("comfirm_password")
+        attrs.pop("confirm_password")
 
         return attrs
 

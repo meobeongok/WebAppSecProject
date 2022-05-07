@@ -91,7 +91,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = Member(**validated_data)
         user.set_password(password)
         user.save()
-        return (user,)
+        return user
 
     def validate(self, attrs):
         if attrs["password"] != attrs["confirm_password"]:

@@ -1,9 +1,13 @@
 import * as React from 'react'
+import { useAxiosInstance, usePageTitle } from '@/hooks'
 import { useForm } from '@mantine/form'
-import { Logo, Metadata } from '@/components'
+import { Logo } from '@/components'
 import { FiAtSign, FiLock } from 'react-icons/fi'
 import { Button, createStyles, Paper, PasswordInput, TextInput, Title } from '@mantine/core'
-import type { NextPage } from '@/types/next'
+import { api } from '@/constants'
+import { useTokenStore } from '@/stores'
+import { useLocation, useNavigate } from 'react-router-dom'
+import type { TokenPayload } from '@/types'
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -51,7 +55,16 @@ const useStyles = createStyles((theme) => ({
   }
 }))
 
-const Login: NextPage = () => {
+function Login(): JSX.Element {
+  usePageTitle('Sign in')
+
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { from } = location.state as { from: string }
+
+  const axiosInstance = useAxiosInstance()
+  const setAccessToken = useTokenStore((state) => state.setAccessToken)
+
   const { classes } = useStyles()
 
   const form = useForm({
@@ -65,16 +78,21 @@ const Login: NextPage = () => {
     }
   })
 
-  function handleSubmit(e: React.FormEvent): void {
+  async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault()
 
     const { hasErrors } = form.validate()
     if (hasErrors) return
+
+    const data = await axiosInstance.post<TokenPayload>(api.signin, form.values).then(({ data }) => data)
+
+    setAccessToken(data.access)
+
+    navigate(from ?? '/', { replace: true })
   }
 
   return (
     <>
-      <Metadata title="Login - Alunno" description="Alunno's login page" />
       <div>
         <div className={classes.container}>
           <div className={classes.header}>
@@ -83,9 +101,18 @@ const Login: NextPage = () => {
           </div>
           <Paper className={classes.loginContainer} shadow="sm">
             <form onSubmit={handleSubmit} className={classes.form}>
-              <TextInput required label="Email" id="email" icon={<FiAtSign />} placeholder="Your email" {...form.getInputProps('email')} />
+              <TextInput
+                required
+                autoComplete="email"
+                label="Email"
+                id="email"
+                icon={<FiAtSign />}
+                placeholder="Your email"
+                {...form.getInputProps('email')}
+              />
               <PasswordInput
                 required
+                autoComplete="current-password"
                 label="Password"
                 id="password"
                 placeholder="Your password"

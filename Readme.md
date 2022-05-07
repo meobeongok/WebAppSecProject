@@ -4,7 +4,7 @@
 
 ## What is Alunno?
 
-Alunno is a web-based course management application for WebAppSec course which uses [Django](https://www.djangoproject.com) and [Next.js](https://nextjs.org).
+Alunno is a web-based course management application for WebAppSec course which uses [Django](https://www.djangoproject.com) and [React](https://reactjs.org).
 
 🚀 Fast
 
@@ -147,7 +147,6 @@ cd Web-Application-Project
 
   - [TypeScript](https://www.typescriptlang.org)
   - [React](https://reactjs.org)
-  - [Next.js](https://nextjs.org)
   - [Mantine](https://mantine.dev)
 
 - Love ❤️

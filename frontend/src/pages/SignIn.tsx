@@ -89,7 +89,11 @@ function Login(): JSX.Element {
     },
 
     validate: {
-      email: (value) => (/^\S+@\S+$/i.test(value) ? undefined : 'Invalid email')
+      email: (value) => {
+        if (!/^\S+@\S+$/i.test(value)) return 'Invalid email'
+        if (value.length > 255) return 'Email length must be lower than 255'
+      },
+      password: (value) => (value.length >= 8 ? undefined : 'Password too short')
     }
   })
 

@@ -20,14 +20,14 @@ function PrivateElement(): JSX.Element {
     async function getTokens(): Promise<void> {
       try {
         if (accessToken) {
-          setTimeout(() => setAuthComplete(true), 1000)
+          setTimeout(() => setAuthComplete(true), 500)
           return
         }
 
         const data = await axiosInstance.post<TokenPayload>(api.refresh).then(({ data }) => data)
         setAccessToken(data.access)
 
-        setTimeout(() => setAuthComplete(true), 1000)
+        setTimeout(() => setAuthComplete(true), 500)
       } catch {
         setAuthComplete(true)
       }

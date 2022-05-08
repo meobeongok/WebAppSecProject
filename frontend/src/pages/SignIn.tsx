@@ -2,12 +2,13 @@ import * as React from 'react'
 import { useAxiosInstance, usePageTitle } from '@/hooks'
 import { useForm } from '@mantine/form'
 import { Logo } from '@/components'
-import { FiAtSign, FiLock } from 'react-icons/fi'
-import { Button, createStyles, Paper, PasswordInput, TextInput, Title } from '@mantine/core'
+import { FiAlertTriangle, FiAtSign, FiLock } from 'react-icons/fi'
+import { Alert, Button, createStyles, LoadingOverlay, Paper, PasswordInput, TextInput, Title } from '@mantine/core'
 import { api } from '@/constants'
 import { useTokenStore } from '@/stores'
 import { useLocation, useNavigate } from 'react-router-dom'
 import type { TokenPayload } from '@/types'
+import type { AxiosError } from 'axios'
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -36,11 +37,15 @@ const useStyles = createStyles((theme) => ({
   loginContainer: {
     minWidth: '10rem',
     maxWidth: '40rem',
-    padding: '1rem 1.5rem 1.5rem',
-    borderRadius: theme.radius.md,
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: '2rem'
+    marginTop: '1.5rem'
+  },
+
+  paper: {
+    padding: '1rem 1.5rem 1.5rem',
+    borderRadius: theme.radius.md,
+    marginTop: '1.5rem'
   },
 
   form: {
@@ -62,8 +67,18 @@ function Login(): JSX.Element {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const axiosInstance = useAxiosInstance()
+  const accessToken = useTokenStore((state) => state.accessToken)
   const setAccessToken = useTokenStore((state) => state.setAccessToken)
+
+  const axiosInstance = useAxiosInstance()
+
+  const [isAuthComplete, setAuthComplete] = React.useState<boolean>(false)
+  const [isLoading, setLoading] = React.useState<boolean>(false)
+  const [currentStatus, setCurrentStatus] = React.useState<{
+    title: string
+    description: string
+    color: string
+  }>()
 
   const { classes } = useStyles()
 
@@ -78,15 +93,59 @@ function Login(): JSX.Element {
     }
   })
 
+  function handleCloseAlert(): void {
+    setCurrentStatus(undefined)
+  }
+
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault()
 
+    setLoading(true)
+
     const { hasErrors } = form.validate()
-    if (hasErrors) return
+    if (hasErrors) {
+      setLoading(false)
+      return
+    }
 
-    const data = await axiosInstance.post<TokenPayload>(api.signIn, form.values).then(({ data }) => data)
+    axiosInstance
+      .post<TokenPayload>(api.signIn, form.values)
+      .then(({ data }) => {
+        setCurrentStatus({ title: 'Signed in', description: 'Please wait... 😘', color: 'blue' })
+        setTimeout(() => setAccessToken(data.access), 1500)
+      })
+      .catch((error: AxiosError) => {
+        if (error.response && error.response.status === 401) {
+          setCurrentStatus({ title: 'Invalid email or password', description: 'Please try another password', color: 'red' })
+        }
 
-    setAccessToken(data.access)
+        setTimeout(() => setLoading(false), 500)
+      })
+  }
+
+  React.useEffect(() => {
+    async function getTokens(): Promise<void> {
+      try {
+        if (accessToken) {
+          setTimeout(() => setAuthComplete(true), 500)
+          navigate('/', { replace: true })
+          return
+        }
+
+        const data = await axiosInstance.post<TokenPayload>(api.refresh).then(({ data }) => data)
+        setAccessToken(data.access)
+
+        setTimeout(() => setAuthComplete(true), 500)
+      } catch {
+        setTimeout(() => setAuthComplete(true), 500)
+      }
+    }
+
+    getTokens()
+  }, [])
+
+  React.useEffect(() => {
+    if (!accessToken) return
 
     if (location.state && Object.keys(location.state as { from: string }).find((key) => key === 'from')) {
       const { from } = location.state as { from: string }
@@ -94,7 +153,9 @@ function Login(): JSX.Element {
     } else {
       navigate('/', { replace: true })
     }
-  }
+  }, [accessToken])
+
+  if (!isAuthComplete) return <LoadingOverlay visible />
 
   return (
     <>
@@ -104,32 +165,46 @@ function Login(): JSX.Element {
             <Logo className={classes.logo} />
             <Title className={classes.title}>Sign in to Alunno 😍</Title>
           </div>
-          <Paper className={classes.loginContainer} shadow="sm">
-            <form onSubmit={handleSubmit} className={classes.form}>
-              <TextInput
-                required
-                autoComplete="email"
-                label="Email"
-                id="email"
-                icon={<FiAtSign />}
-                placeholder="Your email"
-                {...form.getInputProps('email')}
-              />
-              <PasswordInput
-                required
-                autoComplete="current-password"
-                label="Password"
-                id="password"
-                placeholder="Your password"
-                icon={<FiLock />}
-                toggleTabIndex={0}
-                {...form.getInputProps('password')}
-              />
-              <Button className={classes.signInButton} type="submit">
-                Sign in
-              </Button>
-            </form>
-          </Paper>
+          <div className={classes.loginContainer}>
+            {currentStatus && (
+              <Alert
+                icon={<FiAlertTriangle />}
+                color={currentStatus.color}
+                title={currentStatus.title}
+                withCloseButton
+                closeButtonLabel="Close alert"
+                onClose={handleCloseAlert}
+              >
+                {currentStatus.description}
+              </Alert>
+            )}
+            <Paper className={classes.paper} shadow="sm">
+              <form onSubmit={handleSubmit} className={classes.form}>
+                <TextInput
+                  required
+                  autoComplete="email"
+                  label="Email"
+                  id="email"
+                  icon={<FiAtSign />}
+                  placeholder="Your email"
+                  {...form.getInputProps('email')}
+                />
+                <PasswordInput
+                  required
+                  autoComplete="current-password"
+                  label="Password"
+                  id="password"
+                  placeholder="Your password"
+                  icon={<FiLock />}
+                  toggleTabIndex={0}
+                  {...form.getInputProps('password')}
+                />
+                <Button className={classes.signInButton} type="submit" loading={isLoading}>
+                  Sign in
+                </Button>
+              </form>
+            </Paper>
+          </div>
         </div>
       </div>
     </>

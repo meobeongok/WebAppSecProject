@@ -1,8 +1,9 @@
 import * as React from 'react'
-import { Logo } from '@/components'
+import { FileInput, Logo } from '@/components'
 import { useAxiosInstance, usePageTitle } from '@/hooks'
 import { useNavigate } from 'react-router-dom'
 import { Button, createStyles, keyframes, Paper, PasswordInput, Select, TextInput, Title } from '@mantine/core'
+import { IMAGE_MIME_TYPE } from '@mantine/dropzone'
 import { FiAtSign, FiFlag, FiInfo, FiLock, FiUser } from 'react-icons/fi'
 import { useForm } from '@mantine/form'
 import { api } from '@/constants'
@@ -52,9 +53,12 @@ const useStyles = createStyles((theme) => ({
   },
 
   formContainer: {
+    padding: '0 2rem',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    flexDirection: 'column',
+    gap: '1.5rem'
   },
 
   paper: {
@@ -114,7 +118,9 @@ const useStyles = createStyles((theme) => ({
 
   title: {
     textAlign: 'center'
-  }
+  },
+
+  image: {}
 }))
 
 const genders = [
@@ -130,14 +136,23 @@ function SignUp(): JSX.Element {
   const navigate = useNavigate()
   const axiosInstance = useAxiosInstance()
 
-  const form = useForm({
+  const form = useForm<{
+    code: string
+    name: string
+    email: string
+    password: string
+    confirmPassword: string
+    gender: string
+    image?: File
+  }>({
     initialValues: {
       code: '',
       name: '',
       email: '',
       password: '',
       confirmPassword: '',
-      gender: ''
+      gender: '',
+      image: undefined
     },
 
     validate: {
@@ -159,8 +174,12 @@ function SignUp(): JSX.Element {
     if (hasErrors) return
 
     axiosInstance
-      .post(api.signUp, form.values)
-      .then(() => navigate('/signin', { replace: true }))
+      .post(api.signUp, form.values, {
+        headers: {
+          'content-type': 'multipart/form-data'
+        }
+      })
+      .then(() => navigate('/signin'))
       .catch((err) => {
         if (err.response) {
           const errors: Record<string, string> = {}
@@ -175,6 +194,10 @@ function SignUp(): JSX.Element {
             errors.email = 'Duplicate email, please use another email'
           }
 
+          if (data.image && data.image[0] === 'The submitted data was not a file. Check the encoding type on the form') {
+            errors.image = 'Invalid image, please use another image'
+          }
+
           form.setErrors(errors)
         }
       })
@@ -183,6 +206,7 @@ function SignUp(): JSX.Element {
   return (
     <div className={classes.container}>
       <div className={classes.formContainer}>
+        <Title>Setting up an Alunno account</Title>
         <Paper className={classes.paper}>
           <form className={classes.form} onSubmit={handleSubmit}>
             <TextInput required label="Code" id="code" icon={<FiInfo />} placeholder="Your code" {...form.getInputProps('code')} />
@@ -217,6 +241,13 @@ function SignUp(): JSX.Element {
               toggleTabIndex={0}
               {...form.getInputProps('confirmPassword')}
             />
+            <FileInput
+              label="Avatar"
+              onDrop={(files) => {
+                form.setFieldValue('image', files[0])
+              }}
+              accept={IMAGE_MIME_TYPE}
+            />
             <Button className={classes.button} type="submit">
               Sign up 🙃
             </Button>
@@ -226,7 +257,9 @@ function SignUp(): JSX.Element {
       <div className={classes.info}>
         <div className={classes.gradient} />
         <Logo className={classes.logo} />
-        <Title className={classes.title}>Join our amazing world</Title>
+        <Title order={2} className={classes.title}>
+          Join our amazing world 😍😍😍
+        </Title>
       </div>
     </div>
   )

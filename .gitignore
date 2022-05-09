@@ -19,17 +19,12 @@ backend/*/migrations/*
 # Environments
 .venv
 
-### Nextjs ###
+### React ###
 # dependencies
 node_modules
 
-# next.js
-.next/
-out/
-next-env.d.ts
-
 # production
-build
+dist
 
 # misc
 .DS_Store

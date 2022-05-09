@@ -134,6 +134,50 @@ cd Web-Application-Project
     ```bash
     pnpm build
     ```
+### Docker setup
+- Environment variables setup
+  - Backend `.env.local` template
+
+    ```
+    DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+    DJANGO_SECRET_KEY=k=ke$8gp0x88=&$p9_r328jn@*j1y^rz+f81s5wv@a=)8(yuc@
+    DJANGO_DEBUG=False
+
+    ADMIN_CODE=123456
+    ADMIN_PASSWORD=123456
+    ADMIN_USERNAME=admin
+    ADMIN_EMAIL=admin@admin.com
+
+    # uncomment to use postpreSQL
+    #DATABASE=postgres
+    #SQL_ENGINE=django.db.backends.postgresql
+    #SQL_DATABASE=postgres
+    #SQL_USER=postgres
+    #SQL_PASSWORD=k&432postgres
+    #SQL_HOST=postgresdb
+    #SQL_PORT=5432
+    ```
+
+  - Frontend `.env.local` template
+
+    ```
+    VITE_BACKEND_URL=http://127.0.0.1/api
+    ```
+
+  - PostgreSQL `.env.local` template
+
+    ```
+    POSTGRES_NAME=alunno
+    POSTGRES_USER=alunno
+    POSTGRES_PASSWORD=k&432alunno
+    ```
+- Run
+
+In Web-Application-Project folder, run command:
+
+```
+docker-compose up
+```
 
 ## Tech Stack
 
@@ -148,6 +192,11 @@ cd Web-Application-Project
   - [TypeScript](https://www.typescriptlang.org)
   - [React](https://reactjs.org)
   - [Mantine](https://mantine.dev)
+
+- Deploy
+
+  - [docker](https://www.docker.com/)
+  - [nginx](https://www.nginx.com/)
 
 - Love ❤️
 

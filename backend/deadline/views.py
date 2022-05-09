@@ -241,6 +241,8 @@ class DeadlineSubmitFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
         queryset = DeadlineSubmit.objects.filter(pk=deadlineSubmit_pk, member=member_pk)
 
         if queryset.exists():
+            course_pk = queryset[0].deadline.lesson.course.id
+            request.data['file_upload'].name = f"{course_pk}_submit_{request.data['file_upload'].name}"
             serializer = FileSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
@@ -259,6 +261,8 @@ class DeadlineSubmitFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
 
         if queryset.exists():
             instance = queryset[0]
+            course_pk = queryset[0].deadlineSubmit.deadline.lesson.course.id
+            request.data['file_upload'].name = f"{course_pk}_submit_{request.data['file_upload'].name}"
             serializer = FileSerializer(instance=instance, data=request.data)
             serializer.is_valid(raise_exception=True)
             instance.file_upload.delete()
@@ -323,6 +327,8 @@ class DeadlineFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
         queryset = Deadline.objects.filter(pk=deadline_pk, create_by=member_pk)
 
         if queryset.exists():
+            course_pk = queryset[0].lesson.course.id
+            request.data['file_upload'].name = f"{course_pk}_deadline_{request.data['file_upload'].name}"
             serializer = FileSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
@@ -340,6 +346,8 @@ class DeadlineFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
 
         if queryset.exists():
             instance = queryset[0]
+            course_pk = queryset[0].deadline.lesson.course.id
+            request.data['file_upload'].name = f"{course_pk}_deadline_{request.data['file_upload'].name}"
             serializer = FileSerializer(instance=instance, data=request.data)
             serializer.is_valid(raise_exception=True)
             instance.file_upload.delete()

@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  postgresdb:
+    image: postgres:14.2-alpine
+    expose:
+      - 5432
+    env_file:
+      - ./postgreSQL/.env.local
+    volumes:
+      - postgres_data_volume:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    expose:
+      - 8000
+    volumes:
+      - django_static_volume:/backend/staticfiles
+      - django_media_volume:/backend/mediafiles
+    env_file:
+      - ./backend/.env.local
+    command: sh -c ./command.sh
+    depends_on:
+      - postgresdb
+
+  frontend:
+    build: ./frontend
+    ports:
+      - 80:80
+    volumes:
+      - django_static_volume:/backend/staticfiles
+      - django_media_volume:/backend/mediafiles
+    env_file:
+      - ./frontend/.env.local
+
+    depends_on:
+      - backend
+
+volumes:
+  django_static_volume:
+  django_media_volume:
+  postgres_data_volume:

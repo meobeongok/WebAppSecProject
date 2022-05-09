@@ -15,6 +15,7 @@ media
 backend/img/*
 backend/*/migrations/*
 !backend/*/migrations/__init__.py
+backend/staticfiles
 
 # Environments
 .venv

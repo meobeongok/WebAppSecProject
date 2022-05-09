@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
-from .views import APIStructureView
+from .views import APIStructureView, secureMediaView
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 
@@ -28,4 +28,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("courseAPI/", include("course.urls")),
     path("deadlineAPI/", include("deadline.urls")),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path("media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",secureMediaView.as_view())
+] 
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from course.models import Lesson
 from deadline.models import Deadline, DeadlineSubmit
@@ -8,6 +9,13 @@ from deadline.models import Deadline, DeadlineSubmit
 
 
 class File(models.Model):
+
+    def get_upload_path(instance, filename):
+        parts = filename.split("_")
+        course_id = parts[0]
+        file_uuid = uuid.uuid4().hex
+        return f"course_{course_id}/{file_uuid}_{'_'.join(parts[1:])}"
+
     lesson = models.ForeignKey(
         Lesson,
         on_delete=models.CASCADE,
@@ -30,7 +38,7 @@ class File(models.Model):
         blank=True,
     )
     name = models.CharField(max_length=50)
-    file_upload = models.FileField(upload_to="file/%Y/%m/%d/")
+    file_upload = models.FileField(upload_to=get_upload_path)
     in_folder = models.CharField(max_length=200, blank=True)
 
     def delete(self, using=None, keep_parents=False):

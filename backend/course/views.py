@@ -88,6 +88,7 @@ class CourseViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
             instance = serializer.save()
             instance.created_by = queryset[0]
             instance.course_lecturer.add(queryset[0])
+            instance.course_member.add(queryset[0])
             instance.save()
             return Response(serializer.data, status=201)
         return Response({"errors": "Bad request"}, status=400)
@@ -304,6 +305,7 @@ class LessonFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
             pk=lesson_pk, course=course_pk, course__course_member=member_pk
         )
         if queryset.exists():
+            request.data['file_upload'].name = f"{course_pk}_lesson_{request.data['file_upload'].name}"
             serializer = FileSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
@@ -325,6 +327,7 @@ class LessonFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
         )
         if queryset.exists():
             instance = queryset[0]
+            request.data['file_upload'].name = f"{course_pk}_lesson_{request.data['file_upload'].name}"
             serializer = FileSerializer(instance=instance, data=request.data)
             serializer.is_valid(raise_exception=True)
             instance.file_upload.delete()

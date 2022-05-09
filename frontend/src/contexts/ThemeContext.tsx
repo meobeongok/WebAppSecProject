@@ -2,6 +2,7 @@ import * as React from 'react'
 import { useLocalStorage } from '@mantine/hooks'
 import { createContext } from '@/helpers'
 import { ColorSchemeProvider, Global, MantineProvider } from '@mantine/core'
+import { NotificationsProvider } from '@mantine/notifications'
 import { globalStyles, overrideTheme } from '@/styles'
 
 type Theme = 'light' | 'dark' | 'system'
@@ -54,8 +55,10 @@ function ThemeProvider({ children }: ThemeContextProps): JSX.Element {
     <ThemeContextProvider value={value}>
       <ColorSchemeProvider colorScheme={actualTheme} toggleColorScheme={toggleTheme}>
         <MantineProvider theme={{ colorScheme: actualTheme, ...overrideTheme }} withGlobalStyles withNormalizeCSS>
-          <Global styles={globalStyles} />
-          {children}
+          <NotificationsProvider>
+            <Global styles={globalStyles} />
+            {children}
+          </NotificationsProvider>
         </MantineProvider>
       </ColorSchemeProvider>
     </ThemeContextProvider>

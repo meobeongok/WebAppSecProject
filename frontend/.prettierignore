@@ -1,4 +1,5 @@
 buid/**
 out/**
 public/**
+dist/**
 pnpm-lock.yaml

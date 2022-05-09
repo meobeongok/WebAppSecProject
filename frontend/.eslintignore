@@ -1,6 +1,7 @@
 build/**
 out/**
 public/**
+dist/**
 next-env.d.ts
 pnpm-lock.yaml
 vite.config.ts

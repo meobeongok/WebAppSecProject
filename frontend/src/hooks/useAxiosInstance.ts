@@ -5,6 +5,7 @@ import { api } from '@/constants'
 import { useTokenStore } from '@/stores'
 import { axiosInstance } from '@/utils'
 import type { TokenPayload } from '@/types'
+import { showNotification } from '@mantine/notifications'
 
 function useAxiosInstance() {
   const navigate = useNavigate()
@@ -29,7 +30,7 @@ function useAxiosInstance() {
       (response) => response,
       async (error: AxiosError) => {
         try {
-          const data = await axios.post<TokenPayload>(api.refresh).then(({ data }) => data)
+          const data = await axios.post<TokenPayload>(import.meta.env.VITE_BACKEND_URL + api.refresh).then(({ data }) => data)
           setAccessToken(data.access)
 
           // Resend request
@@ -41,6 +42,11 @@ function useAxiosInstance() {
         } catch (error) {
           if (axios.isAxiosError(error) && error.response?.status === 401) {
             setAccessToken(undefined)
+            showNotification({
+              title: 'Token Expired',
+              message: 'Please login again 🥲',
+              color: 'red'
+            })
             navigate('/signin', { state: { from: location }, replace: true })
           } else Promise.reject(error)
         }

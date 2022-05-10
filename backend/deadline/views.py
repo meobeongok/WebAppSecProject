@@ -241,6 +241,8 @@ class DeadlineSubmitFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
         queryset = DeadlineSubmit.objects.filter(pk=deadlineSubmit_pk, member=member_pk)
 
         if queryset.exists():
+            if queryset[0].is_finished:
+                return Response({"error":"Deadline has already submited"}, status=403)
             course_pk = queryset[0].deadline.lesson.course.id
             request.data['file_upload'].name = f"{course_pk}_submit_{request.data['file_upload'].name}"
             serializer = FileSerializer(data=request.data)
@@ -260,6 +262,8 @@ class DeadlineSubmitFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
         queryset = File.objects.filter(pk=pk, deadlineSubmit=deadlineSubmit_pk)
 
         if queryset.exists():
+            if queryset[0].deadlineSubmit.is_finished:
+                return Response({"error":"Deadline has already submited"} , status=403)
             instance = queryset[0]
             course_pk = queryset[0].deadlineSubmit.deadline.lesson.course.id
             request.data['file_upload'].name = f"{course_pk}_submit_{request.data['file_upload'].name}"

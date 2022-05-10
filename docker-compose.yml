@@ -19,7 +19,6 @@ services:
       - django_media_volume:/backend/mediafiles
     env_file:
       - ./backend/.env.local
-    command: sh -c ./command.sh
     depends_on:
       - postgresdb
 

@@ -143,6 +143,8 @@ cd Web-Application-Project
     DJANGO_SECRET_KEY=k=ke$8gp0x88=&$p9_r328jn@*j1y^rz+f81s5wv@a=)8(yuc@
     DJANGO_DEBUG=False
 
+    # auto create a superuser if CREATE_ADMIN=True
+    CREATE_ADMIN=True
     ADMIN_CODE=123456
     ADMIN_PASSWORD=123456
     ADMIN_USERNAME=admin
@@ -173,11 +175,11 @@ cd Web-Application-Project
     ```
 - Run
 
-In Web-Application-Project folder, run command:
+    In Web-Application-Project folder, run command:
 
-```
-docker-compose up
-```
+    ```
+    docker-compose up
+    ```
 
 ## Tech Stack
 

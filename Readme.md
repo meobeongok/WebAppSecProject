@@ -167,9 +167,9 @@ cd Web-Application-Project
   - PostgreSQL `.env.local` template
 
     ```
-    POSTGRES_NAME=alunno
-    POSTGRES_USER=alunno
-    POSTGRES_PASSWORD=k&432alunno
+    POSTGRES_NAME=postgres
+    POSTGRES_USER=postgres
+    POSTGRES_PASSWORD=k&432postgres
     ```
 - Run
 

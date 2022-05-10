@@ -10,8 +10,9 @@ RUN pnpm i
 COPY . .
 RUN pnpm build
 
-FROM nginx:1.21-alpine
+FROM owasp/modsecurity-crs:nginx-alpine
 COPY --from=builder /frontend/dist /usr/share/nginx/html
-RUN rm /etc/nginx/conf.d/default.conf
-COPY ./nginx/nginx.conf /etc/nginx/conf.d
+RUN rm /etc/nginx/templates/conf.d/default.conf.template
+COPY ./nginx/nginx.conf /etc/nginx/templates/conf.d
+RUN mv /etc/nginx/templates/conf.d/nginx.conf /etc/nginx/templates/conf.d/default.conf.template
 CMD ["nginx", "-g", "daemon off;"]

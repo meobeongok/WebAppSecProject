@@ -1,4 +1,3 @@
-from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -28,9 +27,6 @@ class secureResourceMediaView(APIView):
             file = queryset[0]
             response = Response()
             response["Content-Disposition"] = "attachment; filename={}".format(file_name)
-            if settings.DEBUG:
-                response.content = file.file_upload.read()
-                return response
             response['X-Accel-Redirect'] = "/sercure/media/course_{}/{}_{}_{}".format(course_pk,file_uuid,model_name,file_name)
             return response
         return Response({"error":"File not exist"},status=404)
@@ -43,9 +39,6 @@ class secureProfileImageMediaView(APIView):
             file = queryset[0]
             response = Response()
             response["Content-Disposition"] = "attachment; filename={}".format(image_name)
-            if settings.DEBUG:
-                response.content = file.image.read()
-                return response
             response['X-Accel-Redirect'] = "/sercure/media/img/{}".format(image_name)
             return response
         return Response({"error":"File not exist"},status=404)

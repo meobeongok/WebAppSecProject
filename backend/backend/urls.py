@@ -29,6 +29,22 @@ urlpatterns = [
     path("courseAPI/", include("course.urls")),
     path("deadlineAPI/", include("deadline.urls")),
     path("media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",secureMediaView.as_view())
-] 
+]
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns = [
+    path("", APIStructureView.as_view()),
+    path("account/", include("account.urls")),
+    path("admin/", admin.site.urls),
+    path("courseAPI/", include("course.urls")),
+    path("deadlineAPI/", include("deadline.urls")),
+    path("media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",secureMediaView.as_view())
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
+else:
+    urlpatterns = [
+    path("api/", APIStructureView.as_view()),
+    path("api/account/", include("account.urls")),
+    path("admin/", admin.site.urls),
+    path("api/courseAPI/", include("course.urls")),
+    path("api/deadlineAPI/", include("deadline.urls")),
+    path("media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",secureMediaView.as_view())
+    ]

@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from resource.models import File
+from account.models import Member
 from course.models import Course
 
 class APIStructureView(APIView):
@@ -16,9 +17,9 @@ class APIStructureView(APIView):
             }
         )
 
-class secureMediaView(APIView):
+class secureResourceMediaView(APIView):
     permission_classes = (IsAuthenticated,)
-    def get(self, request, course_pk, file_uuid, model_name, file_name):
+    def get(self, request, course_pk=None, file_uuid=None, model_name=None, file_name=None):
         if not Course.objects.filter(id=course_pk,course_member=request.user.id).exists():
             return Response({"error": "You are not in this course"}, status=403)
         
@@ -26,10 +27,25 @@ class secureMediaView(APIView):
         if queryset.exists():
             file = queryset[0]
             response = Response()
-            response["Content-Disposition"] = "attachment; filename={0}".format(file_name)
+            response["Content-Disposition"] = "attachment; filename={}".format(file_name)
             if settings.DEBUG:
                 response.content = file.file_upload.read()
                 return response
             response['X-Accel-Redirect'] = "/sercure/media/course_{}/{}_{}_{}".format(course_pk,file_uuid,model_name,file_name)
+            return response
+        return Response({"error":"File not exist"},status=404)
+
+class secureProfileImageMediaView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request, image_name=None):
+        queryset = Member.objects.filter(image="img/{}".format(image_name))
+        if queryset.exists():
+            file = queryset[0]
+            response = Response()
+            response["Content-Disposition"] = "attachment; filename={}".format(image_name)
+            if settings.DEBUG:
+                response.content = file.image.read()
+                return response
+            response['X-Accel-Redirect'] = "/sercure/media/img/{}".format(image_name)
             return response
         return Response({"error":"File not exist"},status=404)

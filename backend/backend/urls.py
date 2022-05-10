@@ -17,27 +17,20 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
-from .views import APIStructureView, secureMediaView
+from .views import APIStructureView, secureResourceMediaView, secureProfileImageMediaView
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 
 
-urlpatterns = [
-    path("", APIStructureView.as_view()),
-    path("account/", include("account.urls")),
-    path("admin/", admin.site.urls),
-    path("courseAPI/", include("course.urls")),
-    path("deadlineAPI/", include("deadline.urls")),
-    path("media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",secureMediaView.as_view())
-]
+urlpatterns = []
+
 if settings.DEBUG:
     urlpatterns = [
     path("", APIStructureView.as_view()),
     path("account/", include("account.urls")),
     path("admin/", admin.site.urls),
     path("courseAPI/", include("course.urls")),
-    path("deadlineAPI/", include("deadline.urls")),
-    path("media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",secureMediaView.as_view())
+    path("deadlineAPI/", include("deadline.urls"))
     ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
 else:
     urlpatterns = [
@@ -46,5 +39,6 @@ else:
     path("admin/", admin.site.urls),
     path("api/courseAPI/", include("course.urls")),
     path("api/deadlineAPI/", include("deadline.urls")),
-    path("media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",secureMediaView.as_view())
+    path("media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",secureResourceMediaView.as_view()),
+    path("media/img/<str:image_name>",secureProfileImageMediaView.as_view())
     ]

@@ -26,11 +26,11 @@ urlpatterns = []
 
 if settings.DEBUG:
     urlpatterns = [
-    path("", APIStructureView.as_view()),
-    path("account/", include("account.urls")),
+    path("api/", APIStructureView.as_view()),
+    path("api/account/", include("account.urls")),
     path("admin/", admin.site.urls),
-    path("courseAPI/", include("course.urls")),
-    path("deadlineAPI/", include("deadline.urls"))
+    path("api/courseAPI/", include("course.urls")),
+    path("api/deadlineAPI/", include("deadline.urls")),
     ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
 else:
     urlpatterns = [

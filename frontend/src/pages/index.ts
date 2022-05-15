@@ -1,3 +1,6 @@
 export { default as Home } from './Home'
 export { default as SignIn } from './SignIn'
 export { default as SignUp } from './SignUp'
+export { default as CoursePage } from './Course/Course'
+export { default as CourseLessons } from './Course/CourseLessons'
+export { default as CourseStudent } from './Course/CourseStudent'

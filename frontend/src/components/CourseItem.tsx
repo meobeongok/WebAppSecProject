@@ -10,7 +10,7 @@ const useStyles = createStyles((theme) => ({
   container: {
     backgroundColor: theme.colorScheme === 'light' ? '#ffffff' : '#262626',
     padding: '1rem 3rem',
-    boxShadow: theme.shadows.sm,
+    boxShadow: theme.shadows.xs,
     borderRadius: theme.radius.md,
     display: 'flex',
     flexDirection: 'column',
@@ -27,12 +27,12 @@ const useStyles = createStyles((theme) => ({
   }
 }))
 
-function CourseItem({ course: { name, mskh, courseLecturer } }: CourseItemProps): JSX.Element {
+function CourseItem({ course: { name, id, courseLecturer } }: CourseItemProps): JSX.Element {
   const { classes } = useStyles()
 
   return (
     <div className={classes.container}>
-      <Anchor className={classes.courseName} component={Link} to={`/courses/${mskh}`}>
+      <Anchor className={classes.courseName} component={Link} to={`/courses/${id}`}>
         {name}
       </Anchor>
       {courseLecturer.map((lecturer) => (

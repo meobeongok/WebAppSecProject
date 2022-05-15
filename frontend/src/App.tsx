@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@/contexts'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { GlobalNotification, PrivateElement } from '@/components'
-import { Home, SignIn, SignUp } from '@/pages'
+import { CourseLessons, CoursePage, CourseStudent, Home, SignIn, SignUp } from '@/pages'
 import { MainLayout } from '@/layouts'
 
 function App(): JSX.Element {
@@ -13,6 +13,10 @@ function App(): JSX.Element {
             <Route element={<PrivateElement />}>
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Home />} />
+                <Route path="/courses/:courseId" element={<CoursePage />}>
+                  <Route index element={<CourseLessons />} />
+                  <Route path="students" element={<CourseStudent />} />
+                </Route>
               </Route>
             </Route>
             <Route path="/signin" element={<SignIn />} />

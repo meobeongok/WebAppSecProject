@@ -30,6 +30,8 @@ function useAxiosInstance() {
       (response) => response,
       async (error: AxiosError) => {
         try {
+          if (error.status !== '404') return
+
           const data = await axios.post<TokenPayload>(import.meta.env.VITE_BACKEND_URL + api.refresh).then(({ data }) => data)
           setAccessToken(data.access)
 

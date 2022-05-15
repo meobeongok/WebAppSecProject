@@ -10,7 +10,10 @@ import { api } from '@/constants'
 const useStyles = createStyles((theme) => ({
   wrapper: {
     backgroundColor: theme.colorScheme === 'light' ? '#ffffff' : '#262626',
-    boxShadow: theme.shadows.xs
+    boxShadow: theme.shadows.xs,
+    position: 'sticky',
+    top: 0,
+    zIndex: 100
   },
 
   container: {

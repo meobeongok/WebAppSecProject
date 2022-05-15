@@ -3,10 +3,10 @@ import { FileInput, Logo } from '@/components'
 import { useAxiosInstance, usePageTitle } from '@/hooks'
 import { useNavigate } from 'react-router-dom'
 import { Button, createStyles, keyframes, Paper, PasswordInput, Select, TextInput, Title } from '@mantine/core'
-import { IMAGE_MIME_TYPE } from '@mantine/dropzone'
 import { FiAtSign, FiFlag, FiInfo, FiLock, FiUser } from 'react-icons/fi'
 import { useForm } from '@mantine/form'
 import { api } from '@/constants'
+import { showNotification } from '@mantine/notifications'
 
 const rainbowBackgroundHueRotate = keyframes({
   '0%': {
@@ -179,12 +179,22 @@ function SignUp(): JSX.Element {
           'content-type': 'multipart/form-data'
         }
       })
-      .then(() => navigate('/signin'))
+      .then(() => {
+        showNotification({
+          title: 'Signed up! Success 😍😍😍',
+          message: 'Now you can sign in with this account'
+        })
+        navigate('/signin')
+      })
       .catch((err) => {
         if (err.response) {
           const errors: Record<string, string> = {}
 
           const data = err.response.data as Record<string, string[]>
+
+          if (data.password && data.password[0] === 'This password is too common.') {
+            errors.password = 'This password is too common'
+          }
 
           if (data.code && data.code[0] === 'member with this code already exists.') {
             errors.code = 'Duplicate code, please use another code'
@@ -246,7 +256,7 @@ function SignUp(): JSX.Element {
               onDrop={(files) => {
                 form.setFieldValue('image', files[0])
               }}
-              accept={IMAGE_MIME_TYPE}
+              accept={['image/png', 'image/jpeg']}
             />
             <Button className={classes.button} type="submit">
               Sign up 🙃

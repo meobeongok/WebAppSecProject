@@ -3,10 +3,10 @@ import { useAxiosInstance, usePageTitle } from '@/hooks'
 import { useForm } from '@mantine/form'
 import { Logo } from '@/components'
 import { FiAlertTriangle, FiAtSign, FiLock } from 'react-icons/fi'
-import { Alert, Button, createStyles, LoadingOverlay, Paper, PasswordInput, TextInput, Title } from '@mantine/core'
+import { Alert, Anchor, Button, createStyles, LoadingOverlay, Paper, PasswordInput, TextInput, Title } from '@mantine/core'
 import { api } from '@/constants'
 import { useTokenStore } from '@/stores'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type { TokenPayload } from '@/types'
 import type { AxiosError } from 'axios'
 
@@ -39,7 +39,10 @@ const useStyles = createStyles((theme) => ({
     maxWidth: '40rem',
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: '1.5rem'
+    marginTop: '1.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem'
   },
 
   paper: {
@@ -58,6 +61,10 @@ const useStyles = createStyles((theme) => ({
     marginTop: '0.75rem',
     fontWeight: 400,
     fontSize: theme.fontSizes.md
+  },
+
+  signUp: {
+    textAlign: 'center'
   }
 }))
 
@@ -208,6 +215,9 @@ function Login(): JSX.Element {
                 </Button>
               </form>
             </Paper>
+            <Anchor className={classes.signUp} component={Link} to="/signup">
+              Don't have an account? Sign up 😘
+            </Anchor>
           </div>
         </div>
       </div>

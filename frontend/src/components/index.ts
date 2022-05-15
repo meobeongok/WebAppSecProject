@@ -1,3 +1,4 @@
+export { default as CourseItem } from './CourseItem'
 export { default as FileInput } from './FileInput'
 export { default as Logo } from './Logo'
 export { default as NavBar } from './NavBar'

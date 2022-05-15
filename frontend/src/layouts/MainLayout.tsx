@@ -12,7 +12,7 @@ const useStyles = createStyles({
     maxWidth: '80rem',
     marginLeft: 'auto',
     marginRight: 'auto',
-    padding: '1.5rem'
+    padding: '3rem 1.5rem'
   }
 })
 
@@ -26,7 +26,7 @@ function MainLayout(): JSX.Element {
     async function getUser(): Promise<void> {
       const data = await axiosInstance.get<User>(api.profile).then(({ data }) => ({
         ...data,
-        image: import.meta.env.VITE_BACKEND_URL + data.image
+        image: import.meta.env.VITE_MEDIA_URL + data.image
       }))
       setUser(data)
     }

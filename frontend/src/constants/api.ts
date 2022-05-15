@@ -3,7 +3,9 @@ const api = {
   signUp: '/account/register/',
   signOut: '/account/signout/',
   refresh: '/account/refreshtoken/',
-  profile: '/account/profile/'
+  profile: '/account/profile/',
+  courses: '/courseAPI/courses/',
+  deadlines: '/deadlineAPI/myDeadlines/'
 }
 
 export { api }

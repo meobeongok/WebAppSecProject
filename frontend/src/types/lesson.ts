@@ -7,8 +7,8 @@ interface LessonPayload {
   name: string
   description: string
   course: Course
-  deadlineLesson: Deadline[]
-  fileLesson: LocationPayload[]
+  deadline_lesson: Deadline[]
+  file_lesson: LocationPayload[]
 }
 
 interface Lesson {
@@ -16,7 +16,7 @@ interface Lesson {
   name: string
   description: string
   course: Course
-  deadlineLesson: Deadline[]
+  deadline_lesson: Deadline[]
   locationItems: LocationItem[]
 }
 

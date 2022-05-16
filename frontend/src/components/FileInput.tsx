@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { Dropzone, type DropzoneStatus, type DropzoneProps } from '@mantine/dropzone'
+import { Dropzone, type DropzoneStatus } from '@mantine/dropzone'
 import { FiImage, FiUpload, FiX } from 'react-icons/fi'
-import { createStyles, Text } from '@mantine/core'
+import { createStyles, InputWrapper, type InputWrapperProps, Text } from '@mantine/core'
 import type { IconBaseProps } from 'react-icons/lib'
 
 interface FileInputIconProps extends IconBaseProps {
@@ -39,21 +39,18 @@ function FileInputContent({ status, file }: FileInputContentProps): JSX.Element 
 }
 
 const useFileInputStyles = createStyles({
-  label: {
-    fontSize: 14
-  },
-
   dropzone: {
     borderStyle: 'solid',
     borderWidth: 1
   }
 })
 
-type FileInputProps = Omit<DropzoneProps, 'children'> & {
-  label?: string
+type FileInputProps = Omit<InputWrapperProps, 'children' | 'onDrop'> & {
+  accept?: string[]
+  onDrop: (files: File[]) => void
 }
 
-function FileInput({ onDrop, label, ...props }: FileInputProps): JSX.Element {
+function FileInput({ onDrop, ...props }: FileInputProps): JSX.Element {
   const { classes } = useFileInputStyles()
 
   const [file, setFile] = React.useState<File>()
@@ -64,12 +61,11 @@ function FileInput({ onDrop, label, ...props }: FileInputProps): JSX.Element {
   }
 
   return (
-    <div>
-      {label && <label className={classes.label}>{label}</label>}
-      <Dropzone multiple={false} onDrop={handleDrop} {...props}>
+    <InputWrapper {...props}>
+      <Dropzone className={classes.dropzone} multiple={false} onDrop={handleDrop}>
         {(status) => <FileInputContent status={status} file={file} />}
       </Dropzone>
-    </div>
+    </InputWrapper>
   )
 }
 

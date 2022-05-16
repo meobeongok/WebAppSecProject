@@ -2,18 +2,18 @@ import type { Lesson } from './lesson'
 
 interface Deadline {
   id: number
-  isFinished: boolean
-  finishAt?: string
-  fileDeadlineSubmitLesson: string[]
+  is_finished: boolean
+  finish_at?: string
+  file_deadline_submit_lesson: string[]
   deadline: {
     id: number
     lesson: Lesson
     name: string
     description: string
-    createAt: string
+    create_at: string
     begin: string
     end: string
-    createBy: number
+    create_by: number
   }
 }
 

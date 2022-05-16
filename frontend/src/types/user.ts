@@ -5,7 +5,7 @@ interface User {
   name: string
   image: string
   gender: 'male' | 'female' | 'none'
-  isLecturer: boolean
+  is_lecturer: boolean
 }
 
 export type { User }

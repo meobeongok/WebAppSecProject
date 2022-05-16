@@ -42,16 +42,7 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_RENDERER_CLASSES": (
-        "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
-        "djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer",
-    ),
-    "DEFAULT_PARSER_CLASSES": (
-        "djangorestframework_camel_case.parser.CamelCaseFormParser",
-        "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
-        "djangorestframework_camel_case.parser.CamelCaseJSONParser",
-    ),
+    )
 }
 
 SIMPLE_JWT = {
@@ -139,7 +130,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-CORS_ALLOWED_ORIGINS = os.environ.get("DJANGO_CORS_ALLOWED_ORIGINS", "http://localhost http://127.0.0.1").split(" ")
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    "DJANGO_CORS_ALLOWED_ORIGINS",
+    "http://localhost http://127.0.0.1 http://127.0.0.1:3000",
+).split(" ")
 
 CSRF_COOKIE_SECURE = True
 

@@ -27,7 +27,7 @@ const useStyles = createStyles((theme) => ({
   }
 }))
 
-function CourseItem({ course: { name, id, courseLecturer } }: CourseItemProps): JSX.Element {
+function CourseItem({ course: { name, id, course_lecturer: courseLecturer } }: CourseItemProps): JSX.Element {
   const { classes } = useStyles()
 
   return (

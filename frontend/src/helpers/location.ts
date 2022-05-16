@@ -21,23 +21,23 @@ function fromLocationPayloads(locationResponses: LocationPayload[]): LocationIte
   const locations: LocationItem[] = []
   const fileExtensionPattern = /\.[0-9a-z]+$/i
 
-  const groupedFolder = lodash.groupBy(locationResponses, (i) => i.inFolder)
+  const groupedFolder = lodash.groupBy(locationResponses, (i) => i.in_folder)
 
   let folderId = -1
   for (const folderName in groupedFolder) {
     if (folderName === '') {
       groupedFolder[folderName].forEach((file) => {
-        const match = file.fileUpload.match(fileExtensionPattern)
-        locations.push(new File(file.id, file.name, match ? match[0] : 'binary', import.meta.env.VITE_MEDIA_URL + file.fileUpload, file.inFolder))
+        const match = file.file_upload.match(fileExtensionPattern)
+        locations.push(new File(file.id, file.name, match ? match[0] : 'binary', import.meta.env.VITE_MEDIA_URL + file.file_upload, file.in_folder))
       })
     } else {
       const folder = new Folder(folderId, folderName, '', [])
       folderId -= 1
 
       groupedFolder[folderName].forEach((file) => {
-        const match = file.fileUpload.match(fileExtensionPattern)
+        const match = file.file_upload.match(fileExtensionPattern)
         folder.children?.push(
-          new File(file.id, file.name, match ? match[0] : 'binary', import.meta.env.VITE_MEDIA_URL + file.fileUpload, file.inFolder)
+          new File(file.id, file.name, match ? match[0] : 'binary', import.meta.env.VITE_MEDIA_URL + file.file_upload, file.in_folder)
         )
       })
       locations.push(folder)
@@ -46,4 +46,4 @@ function fromLocationPayloads(locationResponses: LocationPayload[]): LocationIte
   return sortLocationItems(locations)
 }
 
-export { fromLocationPayloads }
+export { sortLocationItems, fromLocationPayloads }

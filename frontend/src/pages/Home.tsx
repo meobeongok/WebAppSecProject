@@ -56,7 +56,7 @@ function Home(): JSX.Element {
     async function getDeadlines(): Promise<void> {
       if (!user) return
 
-      if (user.isLecturer) setDeadlines([])
+      if (user.is_lecturer) setDeadlines([])
 
       const deadlines = await axiosInstance.get<Deadline[]>(api.deadlines).then(({ data }) => data)
       setDeadlines(deadlines)
@@ -107,7 +107,7 @@ function Home(): JSX.Element {
                   })
 
                   return (
-                    <Indicator size={6} color={deadline?.isFinished ? 'green' : 'red'} offset={8} disabled={deadline === undefined}>
+                    <Indicator size={6} color={deadline?.is_finished ? 'green' : 'red'} offset={8} disabled={deadline === undefined}>
                       <div>{day}</div>
                     </Indicator>
                   )

@@ -9,7 +9,6 @@ from deadline.models import Deadline, DeadlineSubmit
 
 
 class File(models.Model):
-
     def get_upload_path(instance, filename):
         parts = filename.split("_")
         course_id = parts[0]

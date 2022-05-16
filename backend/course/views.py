@@ -305,7 +305,9 @@ class LessonFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
             pk=lesson_pk, course=course_pk, course__course_member=member_pk
         )
         if queryset.exists():
-            request.data['file_upload'].name = f"{course_pk}_lesson_{request.data['file_upload'].name}"
+            request.data[
+                "file_upload"
+            ].name = f"{course_pk}_lesson_{request.data['file_upload'].name}"
             serializer = FileSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
@@ -327,7 +329,9 @@ class LessonFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
         )
         if queryset.exists():
             instance = queryset[0]
-            request.data['file_upload'].name = f"{course_pk}_lesson_{request.data['file_upload'].name}"
+            request.data[
+                "file_upload"
+            ].name = f"{course_pk}_lesson_{request.data['file_upload'].name}"
             serializer = FileSerializer(instance=instance, data=request.data)
             serializer.is_valid(raise_exception=True)
             instance.file_upload.delete()

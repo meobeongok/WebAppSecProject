@@ -12,13 +12,11 @@ Alunno is a web-based course management application for WebAppSec course which u
 
 🛡️ Super Duper Secure
 
-🌎 Multilingual
-
 ## Getting Started
 
 ### Prerequisites
 
-- Python: `^3.10.0`
+- Python: `3.9.12`
 - Nodejs: `16.15.0`
 
 ### Environment variables
@@ -134,8 +132,11 @@ cd Web-Application-Project
     ```bash
     pnpm build
     ```
+
 ### Docker setup
+
 - Environment variables setup
+
   - Backend `.env.local` template
 
     ```
@@ -173,13 +174,14 @@ cd Web-Application-Project
     POSTGRES_USER=postgres
     POSTGRES_PASSWORD=k&432postgres
     ```
+
 - Run
 
-    In Web-Application-Project folder, run command:
+  In Web-Application-Project folder, run command:
 
-    ```
-    docker-compose up
-    ```
+  ```
+  docker-compose up
+  ```
 
 ## Tech Stack
 

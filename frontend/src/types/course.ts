@@ -5,8 +5,8 @@ interface Course {
   mskh: string
   name: string
   description: string
-  courseMember: User[]
-  courseLecturer: User[]
+  course_member: User[]
+  course_lecturer: User[]
 }
 
 export type { Course }

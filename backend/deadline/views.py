@@ -242,9 +242,11 @@ class DeadlineSubmitFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
 
         if queryset.exists():
             if queryset[0].is_finished:
-                return Response({"error":"Deadline has already submited"}, status=403)
+                return Response({"error": "Deadline has already submited"}, status=403)
             course_pk = queryset[0].deadline.lesson.course.id
-            request.data['file_upload'].name = f"{course_pk}_submit_{request.data['file_upload'].name}"
+            request.data[
+                "file_upload"
+            ].name = f"{course_pk}_submit_{request.data['file_upload'].name}"
             serializer = FileSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
@@ -263,10 +265,12 @@ class DeadlineSubmitFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
 
         if queryset.exists():
             if queryset[0].deadlineSubmit.is_finished:
-                return Response({"error":"Deadline has already submited"} , status=403)
+                return Response({"error": "Deadline has already submited"}, status=403)
             instance = queryset[0]
             course_pk = queryset[0].deadlineSubmit.deadline.lesson.course.id
-            request.data['file_upload'].name = f"{course_pk}_submit_{request.data['file_upload'].name}"
+            request.data[
+                "file_upload"
+            ].name = f"{course_pk}_submit_{request.data['file_upload'].name}"
             serializer = FileSerializer(instance=instance, data=request.data)
             serializer.is_valid(raise_exception=True)
             instance.file_upload.delete()
@@ -332,7 +336,9 @@ class DeadlineFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
 
         if queryset.exists():
             course_pk = queryset[0].lesson.course.id
-            request.data['file_upload'].name = f"{course_pk}_deadline_{request.data['file_upload'].name}"
+            request.data[
+                "file_upload"
+            ].name = f"{course_pk}_deadline_{request.data['file_upload'].name}"
             serializer = FileSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
@@ -351,7 +357,9 @@ class DeadlineFileViewSet(viewsets.ViewSet, viewsets.GenericViewSet):
         if queryset.exists():
             instance = queryset[0]
             course_pk = queryset[0].deadline.lesson.course.id
-            request.data['file_upload'].name = f"{course_pk}_deadline_{request.data['file_upload'].name}"
+            request.data[
+                "file_upload"
+            ].name = f"{course_pk}_deadline_{request.data['file_upload'].name}"
             serializer = FileSerializer(instance=instance, data=request.data)
             serializer.is_valid(raise_exception=True)
             instance.file_upload.delete()

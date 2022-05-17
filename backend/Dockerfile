@@ -11,7 +11,7 @@ RUN pip install -r requirements.txt
 RUN find /usr/local \( -type d -a -name test -o -name tests \)  -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' +
 
 FROM python:3.9.6-alpine
-RUN apk add --no-cache libpq
+RUN apk add --no-cache libpq libmagic
 COPY --from=builder /usr/local/lib/python3.9/site-packages/ /usr/local/lib/python3.9/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 

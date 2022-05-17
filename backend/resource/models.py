@@ -2,10 +2,10 @@ import uuid
 from django.db import models
 from course.models import Lesson
 from deadline.models import Deadline, DeadlineSubmit
+from .validators import FileExtensionValidator, FileContentTypeValidator
 
 # Create your models here.
 
-# comment
 
 
 class File(models.Model):
@@ -37,7 +37,11 @@ class File(models.Model):
         blank=True,
     )
     name = models.CharField(max_length=50)
-    file_upload = models.FileField(upload_to=get_upload_path)
+    file_upload = models.FileField(
+        validators=[FileExtensionValidator(["txt", "pdf", "doc", "docx", "xls", "xlsx", "csv", "zip", "rar", "png", "jpg", "svg", "gif"]),
+                     FileContentTypeValidator()],
+        upload_to=get_upload_path
+    )
     in_folder = models.CharField(max_length=200, blank=True)
 
     def delete(self, using=None, keep_parents=False):

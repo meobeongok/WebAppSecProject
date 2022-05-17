@@ -130,10 +130,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    "DJANGO_CORS_ALLOWED_ORIGINS",
-    "http://localhost http://127.0.0.1 http://127.0.0.1:3000",
-).split(" ")
+CORS_ALLOWED_ORIGINS = os.environ.get("DJANGO_CORS_ALLOWED_ORIGINS", "http://localhost http://127.0.0.1").split(" ")
+
+CSRF_TRUSTED_ORIGINS = os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost http://127.0.0.1").split(" ")
 
 CSRF_COOKIE_SECURE = True
 

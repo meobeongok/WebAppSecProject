@@ -12,6 +12,7 @@ import axios, { type CancelTokenSource } from 'axios'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
 import { addDeadlineToLessons, addFileToLessons, deleteLessonFile } from '@/helpers'
+import { useDisclosure } from '@mantine/hooks'
 
 const useStyles = createStyles((theme) => ({
   items: {
@@ -48,8 +49,14 @@ function CourseLessons(): JSX.Element {
   const [lessons, setLessons] = React.useState<Lesson[]>([])
   const axiosInstance = useAxiosInstance()
   const { isInEditingMode } = useEdit()
-  const [isCreateLessonOpened, setCreateLessonOpened] = React.useState<boolean>(false)
-  const [isCreateLessonSubmitting, setCreateLessonSubmitting] = React.useState<boolean>(false)
+  const [isFormSubmitting, setFormSubmitting] = React.useState<boolean>(false)
+
+  const [isCreateLessonOpened, createLessonHandler] = useDisclosure(false, {
+    onClose: () => {
+      axiosCancelToken.cancel()
+      setFormSubmitting(false)
+    }
+  })
 
   const createLessonForm = useForm({
     initialValues: {
@@ -69,7 +76,7 @@ function CourseLessons(): JSX.Element {
     const { hasErrors } = createLessonForm.validate()
     if (hasErrors) return
 
-    setCreateLessonSubmitting(true)
+    setFormSubmitting(true)
 
     axiosInstance
       .post<Lesson>(`${api.courses}${courseId}/lessons/`, { ...createLessonForm.values, cancelToken: axiosCancelToken })
@@ -95,8 +102,7 @@ function CourseLessons(): JSX.Element {
         })
       )
 
-    setCreateLessonOpened(false)
-    setCreateLessonSubmitting(false)
+    createLessonHandler.close()
   }
 
   function handleEditLesson(lessonId: number, cancelToken: CancelTokenSource, values: Record<string, string>): void {
@@ -250,12 +256,6 @@ function CourseLessons(): JSX.Element {
       })
   }
 
-  function handleCloseCreateLessonForm(): void {
-    setCreateLessonOpened(false)
-    setCreateLessonSubmitting(false)
-    axiosCancelToken.cancel()
-  }
-
   React.useEffect(() => {
     async function getLessons() {
       axiosInstance.get<LessonPayload[]>(`${api.courses}${courseId}/lessons/`).then(({ data }) => {
@@ -294,7 +294,7 @@ function CourseLessons(): JSX.Element {
           <div className={classes.items}>
             {isInEditingMode && (
               <Tooltip label="Create a lesson">
-                <Card className={classes.addLesson} onClick={() => setCreateLessonOpened(true)}>
+                <Card className={classes.addLesson} onClick={createLessonHandler.open}>
                   <Center>
                     <FiPlus />
                   </Center>
@@ -315,18 +315,18 @@ function CourseLessons(): JSX.Element {
             ))}
           </div>
         </div>
-        <Modal title="Create a new lesson" centered opened={isCreateLessonOpened} onClose={handleCloseCreateLessonForm}>
+        <Modal title="Create a new lesson" centered opened={isCreateLessonOpened} onClose={createLessonHandler.close}>
           <form className={classes.form} onSubmit={handleCreateLesson}>
             <TextInput required label="Lesson name" {...createLessonForm.getInputProps('name')} />
             <TextInput label="Lesson description" {...createLessonForm.getInputProps('description')} />
             <div className={classes.formButton}>
-              <Button variant="outline" color="red" onClick={handleCloseCreateLessonForm}>
+              <Button variant="outline" color="red" onClick={createLessonHandler.close}>
                 Cancel
               </Button>
               <Button type="submit">Create</Button>
             </div>
           </form>
-          <LoadingOverlay visible={isCreateLessonSubmitting} />
+          <LoadingOverlay visible={isFormSubmitting} />
         </Modal>
       </>
     )

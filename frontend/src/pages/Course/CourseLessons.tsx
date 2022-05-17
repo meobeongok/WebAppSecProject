@@ -11,7 +11,7 @@ import { FiPlus } from 'react-icons/fi'
 import axios, { type CancelTokenSource } from 'axios'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
-import { addDeadlineToLessons, addFileToLessons, deleteLessonFile } from '@/helpers'
+import { addDeadlineToLessons, addFileToLessons, deleteLessonFile, deleteLessonsDeadline, editLessonsDeadline } from '@/helpers'
 import { useDisclosure } from '@mantine/hooks'
 
 const useStyles = createStyles((theme) => ({
@@ -256,6 +256,47 @@ function CourseLessons(): JSX.Element {
       })
   }
 
+  function handleEditDeadline(lessonId: number, deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource): void {
+    axiosInstance
+      .put<Deadline>(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/`, {
+        ...values,
+        cancelToken: cancelToken.token
+      })
+      .then(({ data }) => {
+        setLessons((previousValue) => editLessonsDeadline(previousValue, lessonId, deadlineId, data))
+        showNotification({
+          title: 'Edit a deadline success 😁',
+          message: 'Yay 😍😍😍'
+        })
+      })
+      .catch(() => {
+        showNotification({
+          color: 'red',
+          title: 'Edit a deadline failed 😨',
+          message: 'Please try again'
+        })
+      })
+  }
+
+  function handleDeleteDeadline(lessonId: number, deadlineId: number, cancelToken: CancelTokenSource): void {
+    axiosInstance
+      .delete(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/`, { cancelToken: cancelToken.token })
+      .then(() => {
+        setLessons((previousValue) => deleteLessonsDeadline(previousValue, lessonId, deadlineId))
+        showNotification({
+          title: 'Delete a deadline success 😁',
+          message: 'Yay 😍😍😍'
+        })
+      })
+      .catch(() =>
+        showNotification({
+          color: 'red',
+          title: 'Delete a deadline failed 😨',
+          message: 'Please try again'
+        })
+      )
+  }
+
   React.useEffect(() => {
     async function getLessons() {
       axiosInstance.get<LessonPayload[]>(`${api.courses}${courseId}/lessons/`).then(({ data }) => {
@@ -309,6 +350,8 @@ function CourseLessons(): JSX.Element {
                 editFile={handleEditFile}
                 deleteFile={handleDeleteFile}
                 createDeadline={handleCreateDeadline}
+                editDeadline={handleEditDeadline}
+                deleteDeadline={handleDeleteDeadline}
                 key={lesson.id}
                 lesson={lesson}
               />

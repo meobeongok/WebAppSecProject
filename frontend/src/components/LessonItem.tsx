@@ -21,6 +21,8 @@ interface LessonItemProps {
   editFile: (lessonId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
   deleteFile: (lessonId: number, fileId: number, cancelToken: CancelTokenSource) => void
   createDeadline: (lessonId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
+  editDeadline: (lessonId: number, deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
+  deleteDeadline: (lessonId: number, deadlineId: number, cancelToken: CancelTokenSource) => void
 }
 
 const useStyles = createStyles((theme) => ({
@@ -81,7 +83,9 @@ function LessonItem({
   createFile,
   editFile,
   deleteFile,
-  createDeadline
+  createDeadline,
+  editDeadline,
+  deleteDeadline
 }: LessonItemProps): JSX.Element {
   const { classes } = useStyles()
   const { isInEditingMode } = useEdit()
@@ -92,8 +96,8 @@ function LessonItem({
     onClose: () => {
       axiosCancelToken.cancel()
       editLessonForm.setValues({
-        name: '',
-        description: ''
+        name,
+        description
       })
       setFormLoading(false)
     }
@@ -284,6 +288,14 @@ function LessonItem({
     createDeadlineHandler.close()
   }
 
+  function handleEditDeadline(deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource) {
+    editDeadline(id, deadlineId, values, cancelToken)
+  }
+
+  function handleDeleteDeadline(deadlineId: number, cancelToken: CancelTokenSource) {
+    deleteDeadline(id, deadlineId, cancelToken)
+  }
+
   return (
     <>
       <Card className={classes.container}>
@@ -334,7 +346,7 @@ function LessonItem({
               {deadline_lesson.map((dl) => (
                 <span key={dl.id}>
                   <Divider my="sm" />
-                  <DeadlineItem deadline={dl} />
+                  <DeadlineItem editDeadline={handleEditDeadline} deleteDeadline={handleDeleteDeadline} deadline={dl} />
                 </span>
               ))}
             </div>
@@ -441,12 +453,10 @@ function LessonItem({
           />
           <TimeInput icon={<FiClock />} required label="End time" {...createDeadlineForm.getInputProps('endTime')} />
           <div className={classes.formButton}>
-            <Button variant="outline" onClick={createDeadlineHandler.close}>
+            <Button color="red" variant="outline" onClick={createDeadlineHandler.close}>
               Cancel
             </Button>
-            <Button color="red" type="submit">
-              Create
-            </Button>
+            <Button type="submit">Create</Button>
           </div>
         </form>
         <LoadingOverlay visible={isFormLoading} />

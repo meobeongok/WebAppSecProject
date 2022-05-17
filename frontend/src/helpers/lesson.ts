@@ -66,4 +66,20 @@ function addDeadlineToLessons(lessons: Lesson[], lessonId: number, deadline: Dea
   return [...newLessons]
 }
 
-export { addFileToLessons, deleteLessonFile, addDeadlineToLessons }
+function editLessonsDeadline(lessons: Lesson[], lessonId: number, deadlineId: number, deadline: Deadline) {
+  const newLessons = lessons
+  const lessonIndex = newLessons.findIndex((lesson) => lesson.id === lessonId)
+  newLessons[lessonIndex].deadline_lesson = newLessons[lessonIndex].deadline_lesson.map((dl) => (dl.id === deadlineId ? deadline : dl))
+
+  return [...newLessons]
+}
+
+function deleteLessonsDeadline(lessons: Lesson[], lessonId: number, deadlineId: number) {
+  const newLessons = lessons
+  const lessonIndex = newLessons.findIndex((lesson) => lesson.id === lessonId)
+  newLessons[lessonIndex].deadline_lesson = newLessons[lessonIndex].deadline_lesson.filter((deadline) => deadline.id !== deadlineId)
+
+  return [...newLessons]
+}
+
+export { addFileToLessons, deleteLessonFile, addDeadlineToLessons, editLessonsDeadline, deleteLessonsDeadline }

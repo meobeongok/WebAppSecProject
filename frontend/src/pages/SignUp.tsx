@@ -141,7 +141,7 @@ function SignUp(): JSX.Element {
     name: string
     email: string
     password: string
-    confirmPassword: string
+    confirm_password: string
     gender: string
     image?: File
   }>({
@@ -150,7 +150,7 @@ function SignUp(): JSX.Element {
       name: '',
       email: '',
       password: '',
-      confirmPassword: '',
+      confirm_password: '',
       gender: '',
       image: undefined
     },
@@ -163,7 +163,7 @@ function SignUp(): JSX.Element {
         if (value.length > 255) return 'Email length must be lower than 255'
       },
       password: (value) => (value.length >= 8 ? undefined : 'Password too short'),
-      confirmPassword: (value, values) => (value === values.password ? undefined : 'Password did not match')
+      confirm_password: (value, values) => (value === values.password ? undefined : 'Password did not match')
     }
   })
 
@@ -249,7 +249,7 @@ function SignUp(): JSX.Element {
               placeholder="Your confirm password"
               icon={<FiLock />}
               toggleTabIndex={0}
-              {...form.getInputProps('confirmPassword')}
+              {...form.getInputProps('confirm_password')}
             />
             <FileInput
               label="Avatar"

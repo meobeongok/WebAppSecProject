@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useParams } from 'react-router-dom'
 import { useAxiosInstance } from '@/hooks'
-import type { File, Lesson, LessonPayload } from '@/types'
+import type { Deadline, File, Lesson, LessonPayload } from '@/types'
 import { api } from '@/constants'
 import { Button, Card, Center, createStyles, Loader, LoadingOverlay, Modal, TextInput, Title, Tooltip } from '@mantine/core'
 import { LessonItem } from '@/components'
@@ -11,7 +11,7 @@ import { FiPlus } from 'react-icons/fi'
 import axios, { type CancelTokenSource } from 'axios'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
-import { addFileToLessons, deleteLessonFile } from '@/helpers'
+import { addDeadlineToLessons, addFileToLessons, deleteLessonFile } from '@/helpers'
 
 const useStyles = createStyles((theme) => ({
   items: {
@@ -228,6 +228,28 @@ function CourseLessons(): JSX.Element {
       )
   }
 
+  function handleCreateDeadline(lessonId: number, values: Record<string, string>, cancelToken: CancelTokenSource): void {
+    axiosInstance
+      .post<Deadline>(`/deadlineAPI/${lessonId}/lecturerDeadlines/`, {
+        ...values,
+        cancelToken: cancelToken.token
+      })
+      .then(({ data }) => {
+        setLessons((previousValue) => addDeadlineToLessons(previousValue, lessonId, data))
+        showNotification({
+          title: 'Create a deadline success 😁',
+          message: 'Yay 😍😍😍'
+        })
+      })
+      .catch(() => {
+        showNotification({
+          color: 'red',
+          title: 'Create a deadline failed 😨',
+          message: 'Please try again'
+        })
+      })
+  }
+
   function handleCloseCreateLessonForm(): void {
     setCreateLessonOpened(false)
     setCreateLessonSubmitting(false)
@@ -286,6 +308,7 @@ function CourseLessons(): JSX.Element {
                 createFile={handleCreateFile}
                 editFile={handleEditFile}
                 deleteFile={handleDeleteFile}
+                createDeadline={handleCreateDeadline}
                 key={lesson.id}
                 lesson={lesson}
               />

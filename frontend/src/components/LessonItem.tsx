@@ -1,7 +1,7 @@
 import * as React from 'react'
 import type { Lesson } from '@/types'
-import { Card, Text, createStyles, Divider, ActionIcon, Tooltip, Menu, Modal, TextInput, LoadingOverlay, Button } from '@mantine/core'
-import { FiEdit, FiPlus, FiX } from 'react-icons/fi'
+import { Card, Text, createStyles, Divider, ActionIcon, Tooltip, Menu, Modal, TextInput, LoadingOverlay, Button, Indicator } from '@mantine/core'
+import { FiCalendar, FiClock, FiEdit, FiPlus, FiX } from 'react-icons/fi'
 import ButtonGroup from './ButtonGroup'
 import LocationTreeView from './LocationTreeview'
 import { useEdit } from '@/contexts'
@@ -9,6 +9,9 @@ import { useForm } from '@mantine/form'
 import axios, { type CancelTokenSource } from 'axios'
 import { useDisclosure } from '@mantine/hooks'
 import FileInput from './FileInput'
+import DeadlineItem from './DeadlineItem'
+import { DatePicker, TimeInput } from '@mantine/dates'
+import dayjs from 'dayjs'
 
 interface LessonItemProps {
   lesson: Lesson
@@ -17,6 +20,7 @@ interface LessonItemProps {
   createFile: (lessonId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
   editFile: (lessonId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
   deleteFile: (lessonId: number, fileId: number, cancelToken: CancelTokenSource) => void
+  createDeadline: (lessonId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
 }
 
 const useStyles = createStyles((theme) => ({
@@ -41,7 +45,8 @@ const useStyles = createStyles((theme) => ({
   },
 
   header: {
-    fontWeight: 600
+    fontWeight: 600,
+    marginTop: '1.5rem'
   },
 
   buttonGroup: {
@@ -62,16 +67,21 @@ const useStyles = createStyles((theme) => ({
     gap: '0.5rem',
     justifyContent: 'end',
     marginTop: '0.5rem'
+  },
+
+  deadlines: {
+    padding: '0 1rem'
   }
 }))
 
 function LessonItem({
-  lesson: { name, id, description, locationItems },
+  lesson: { name, id, description, locationItems, deadline_lesson },
   editLesson,
   deleteLesson,
   createFile,
   editFile,
-  deleteFile
+  deleteFile,
+  createDeadline
 }: LessonItemProps): JSX.Element {
   const { classes } = useStyles()
   const { isInEditingMode } = useEdit()
@@ -108,6 +118,24 @@ function LessonItem({
     }
   })
 
+  const [isCreateDeadlineOpened, createDeadlineHandler] = useDisclosure(false, {
+    onOpen: () => {
+      createDeadlineForm.setValues({
+        name: '',
+        description: '',
+        startDate: new Date(),
+        startTime: new Date(),
+        endDate: new Date(),
+        endTime: new Date()
+      })
+    },
+    onClose: () => {
+      axiosCancelToken.cancel()
+
+      setFormLoading(false)
+    }
+  })
+
   const editLessonForm = useForm({
     initialValues: {
       name,
@@ -132,6 +160,59 @@ function LessonItem({
     validate: {
       name: (value) => (value === '' ? 'Name must not empty' : undefined),
       file_upload: (value) => (value === undefined ? 'File must not empty' : undefined)
+    }
+  })
+
+  const createDeadlineForm = useForm<{
+    name: string
+    description: string
+    startDate: Date
+    startTime: Date
+    endDate: Date
+    endTime: Date
+  }>({
+    initialValues: {
+      name: '',
+      description: '',
+      startDate: new Date(),
+      startTime: new Date(),
+      endDate: new Date(),
+      endTime: new Date()
+    },
+    validate: {
+      startDate: (value, values) => {
+        if (dayjs(value).format('MM:DD:YYYY') > dayjs(values.endDate).format('MM:DD:YYYY')) {
+          return 'Start date must be sooner than end date'
+        }
+        return undefined
+      },
+      startTime: (value, values) => {
+        if (dayjs(values.startDate).format('MM:DD:YYYY') !== dayjs(values.endDate).format('MM:DD:YYYY')) {
+          return undefined
+        }
+
+        if (dayjs(value).format('hh:mm') >= dayjs(values.endTime).format('hh:mm')) {
+          return 'Start time must be sooner than end time'
+        }
+
+        return undefined
+      },
+      endDate: (value) => {
+        if (new Date(dayjs(value).format('MM:DD:YYYY')) < new Date(dayjs(new Date()).format('MM:DD:YYYY'))) {
+          return 'End date must be later than current date'
+        }
+        return undefined
+      },
+      endTime: (value, values) => {
+        const currentTime = new Date()
+        if (dayjs(values.endDate).format('MM:DD:YYYY') !== dayjs(currentTime).format('MM:DD:YYYY')) {
+          return undefined
+        }
+
+        if (dayjs(value).format('hh:mm') <= dayjs(currentTime).format('hh:mm')) {
+          return 'Start time must be later than current time'
+        }
+      }
     }
   })
 
@@ -180,6 +261,29 @@ function LessonItem({
     deleteFile(id, fileId, cancelToken)
   }
 
+  function handleCreateDeadline(e: React.FormEvent) {
+    e.preventDefault()
+
+    const { hasErrors } = createDeadlineForm.validate()
+    if (hasErrors) return
+
+    setFormLoading(true)
+
+    const values = createDeadlineForm.values
+    createDeadline(
+      id,
+      {
+        name: values.name,
+        description: values.description,
+        begin: dayjs(values.startDate).hour(values.startTime.getHours()).minute(values.startTime.getMinutes()).toISOString(),
+        end: dayjs(values.endDate).hour(values.endTime.getHours()).minute(values.endTime.getMinutes()).toISOString()
+      },
+      axiosCancelToken
+    )
+
+    createDeadlineHandler.close()
+  }
+
   return (
     <>
       <Card className={classes.container}>
@@ -198,7 +302,7 @@ function LessonItem({
                 }
               >
                 <Menu.Item onClick={createFileHandler.open}>File</Menu.Item>
-                <Menu.Item>Deadline</Menu.Item>
+                <Menu.Item onClick={createDeadlineHandler.open}>Deadline</Menu.Item>
               </Menu>
               <Tooltip className="group-button" label="Edit lesson">
                 <ActionIcon onClick={editLessonHandler.open} size="md" color="dark" variant="outline">
@@ -216,11 +320,24 @@ function LessonItem({
         <Text className={classes.description}>{description}</Text>
         {locationItems && locationItems.length > 0 && (
           <>
-            <Divider my="sm" />
             <Text className={classes.header}>Lesson material</Text>
+            <Divider my="sm" mx="1rem" />
             <span className={classes.files}>
               <LocationTreeView editFile={handleEditFile} deleteFile={handleDeleteFile} type="lesson" items={locationItems} />
             </span>
+          </>
+        )}
+        {deadline_lesson && deadline_lesson.length > 0 && (
+          <>
+            <Text className={classes.header}>Deadlines</Text>
+            <div className={classes.deadlines}>
+              {deadline_lesson.map((dl) => (
+                <span key={dl.id}>
+                  <Divider my="sm" />
+                  <DeadlineItem deadline={dl} />
+                </span>
+              ))}
+            </div>
           </>
         )}
       </Card>
@@ -271,6 +388,65 @@ function LessonItem({
               Cancel
             </Button>
             <Button type="submit">Create</Button>
+          </div>
+        </form>
+        <LoadingOverlay visible={isFormLoading} />
+      </Modal>
+      <Modal title="Create a new deadline" centered opened={isCreateDeadlineOpened} onClose={createDeadlineHandler.close}>
+        <form className={classes.form} onSubmit={handleCreateDeadline}>
+          <TextInput required label="Name" {...createDeadlineForm.getInputProps('name')} />
+          <TextInput label="Description" {...createDeadlineForm.getInputProps('description')} />
+          <DatePicker
+            required
+            icon={<FiCalendar />}
+            label="Start date"
+            renderDay={(date) => {
+              const currentDate = new Date()
+
+              return (
+                <Indicator
+                  disabled={
+                    date.getDate() !== currentDate.getDate() ||
+                    date.getMonth() !== currentDate.getMonth() ||
+                    date.getFullYear() !== currentDate.getFullYear()
+                  }
+                >
+                  {date.getDate()}
+                </Indicator>
+              )
+            }}
+            {...createDeadlineForm.getInputProps('startDate')}
+          />
+          <TimeInput required icon={<FiClock />} label="Start time" {...createDeadlineForm.getInputProps('startTime')} />
+          <DatePicker
+            required
+            icon={<FiCalendar />}
+            label="End date"
+            renderDay={(date) => {
+              const currentDate = new Date()
+
+              return (
+                <Indicator
+                  disabled={
+                    date.getDate() !== currentDate.getDate() ||
+                    date.getMonth() !== currentDate.getMonth() ||
+                    date.getFullYear() !== currentDate.getFullYear()
+                  }
+                >
+                  {date.getDate()}
+                </Indicator>
+              )
+            }}
+            {...createDeadlineForm.getInputProps('endDate')}
+          />
+          <TimeInput icon={<FiClock />} required label="End time" {...createDeadlineForm.getInputProps('endTime')} />
+          <div className={classes.formButton}>
+            <Button variant="outline" onClick={createDeadlineHandler.close}>
+              Cancel
+            </Button>
+            <Button color="red" type="submit">
+              Create
+            </Button>
           </div>
         </form>
         <LoadingOverlay visible={isFormLoading} />

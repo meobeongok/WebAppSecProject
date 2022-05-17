@@ -96,7 +96,7 @@ const useLocationTreeItemStyles = createStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'stretch',
-    paddingLeft: '0.25rem',
+    paddingLeft: '0.5rem',
     gap: '0.5rem'
   },
 

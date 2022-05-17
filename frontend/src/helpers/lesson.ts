@@ -1,4 +1,4 @@
-import type { Lesson, LocationItem } from '@/types'
+import type { Deadline, Lesson, LocationItem } from '@/types'
 import { Folder } from '@/types'
 import { sortLocationItems } from './location'
 
@@ -58,4 +58,12 @@ function deleteLessonFile(lessons: Lesson[], lessonId: number, fileId: number, i
   return [...newLessons]
 }
 
-export { addFileToLessons, deleteLessonFile }
+function addDeadlineToLessons(lessons: Lesson[], lessonId: number, deadline: Deadline) {
+  const newLessons = lessons
+  const lessonIndex = newLessons.findIndex((lesson) => lesson.id === lessonId)
+  newLessons[lessonIndex].deadline_lesson.push(deadline)
+
+  return [...newLessons]
+}
+
+export { addFileToLessons, deleteLessonFile, addDeadlineToLessons }

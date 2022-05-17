@@ -6,7 +6,7 @@ import { CourseItem } from '@/components'
 import { Calendar } from '@mantine/dates'
 import { useUserStore } from '@/stores'
 import type { Course } from '@/types'
-import type { Deadline } from '@/types/deadline'
+import type { DeadlineSubmit } from '@/types'
 
 const useStyles = createStyles(() => ({
   container: {
@@ -34,7 +34,7 @@ function Home(): JSX.Element {
   const { classes } = useStyles()
 
   const [courses, setCourses] = React.useState<Course[]>()
-  const [deadlines, setDeadlines] = React.useState<Deadline[]>()
+  const [deadlines, setDeadlines] = React.useState<DeadlineSubmit[]>()
 
   const axiosInstance = useAxiosInstance()
 
@@ -44,9 +44,6 @@ function Home(): JSX.Element {
     async function getCourses(): Promise<void> {
       const coursesData = await axiosInstance.get<Course[]>(api.courses).then(({ data }) => data)
       setCourses(coursesData)
-
-      // const deadlines = await axiosInstance.get(api.deadlines).then(({ data }) => data)
-      // console.log(deadlines)
     }
 
     getCourses()
@@ -58,7 +55,7 @@ function Home(): JSX.Element {
 
       if (user.is_lecturer) setDeadlines([])
 
-      const deadlines = await axiosInstance.get<Deadline[]>(api.deadlines).then(({ data }) => data)
+      const deadlines = await axiosInstance.get<DeadlineSubmit[]>(api.deadlines).then(({ data }) => data)
       setDeadlines(deadlines)
     }
 

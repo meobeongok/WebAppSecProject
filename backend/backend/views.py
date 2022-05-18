@@ -48,7 +48,6 @@ class secureResourceMediaView(APIView):
 
 
 class secureProfileImageMediaView(APIView):
-    permission_classes = (IsAuthenticated,)
 
     def get(self, request, image_name=None):
         queryset = Member.objects.filter(image="img/{}".format(image_name))

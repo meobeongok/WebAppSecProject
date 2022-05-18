@@ -47,7 +47,7 @@ from rest_framework_nested import routers
 #             "media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",
 #             secureResourceMediaView.as_view(),
 #         ),
-#         path("media/img/<str:image_name>", secureProfileImageMediaView.as_view()),
+#         path("media/img/<str:image_name>", secureProfileImageMediaView.as_view())
 #     ]
 urlpatterns = [
     path("api/", APIStructureView.as_view()),
@@ -56,8 +56,8 @@ urlpatterns = [
     path("api/courseAPI/", include("course.urls")),
     path("api/deadlineAPI/", include("deadline.urls")),
     path(
-        "media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",
-        secureResourceMediaView.as_view(),
-    ),
-        path("media/img/<str:image_name>", secureProfileImageMediaView.as_view()),
+            "media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",
+            secureResourceMediaView.as_view(),
+        ),
+    path("media/img/<str:image_name>", secureProfileImageMediaView.as_view())
     ]

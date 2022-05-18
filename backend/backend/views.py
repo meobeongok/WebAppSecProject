@@ -40,7 +40,7 @@ class secureResourceMediaView(APIView):
             response["Content-Disposition"] = "attachment; filename={}".format(
                 file_name
             )
-            response["X-Accel-Redirect"] = "/sercure/media/course_{}/{}_{}_{}".format(
+            response["X-Accel-Redirect"] = "/smedia/course_{}/{}_{}_{}".format(
                 course_pk, file_uuid, model_name, file_name
             )
             return response
@@ -57,6 +57,6 @@ class secureProfileImageMediaView(APIView):
             response["Content-Disposition"] = "attachment; filename={}".format(
                 image_name
             )
-            response["X-Accel-Redirect"] = "/sercure/media/img/{}".format(image_name)
+            response["X-Accel-Redirect"] = "/smedia/img/{}".format(image_name)
             return response
         return Response({"error": "File not exist"}, status=404)

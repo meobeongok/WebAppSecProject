@@ -165,6 +165,7 @@ cd Web-Application-Project
 
     ```
     VITE_BACKEND_URL=http://127.0.0.1/api
+    VITE_MEDIA_URL=http://127.0.0.1
     ```
 
   - PostgreSQL `.env.local` template

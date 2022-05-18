@@ -148,7 +148,7 @@ interface LocationTreeItemProps {
 }
 
 function LocationTreeItem({
-  item: { id, name, type, children, file_url: fileUrl, in_folder = '' },
+  item: { id, name, type, children, file_upload: fileUrl, in_folder = '' },
   type: itemType,
   editFile,
   deleteFile,
@@ -157,8 +157,8 @@ function LocationTreeItem({
 }: LocationTreeItemProps): JSX.Element {
   const { classes } = useLocationTreeItemStyles()
   const [isOpen, setOpen] = React.useState<boolean>(false)
-  const accessToken = useTokenStore((state) => state.accessToken)
   const { isInEditingMode } = useEdit()
+  const accessToken = useTokenStore((state) => state.accessToken)
 
   const [isFormSubmitting, setFormSubmitting] = React.useState<boolean>(false)
 
@@ -279,13 +279,15 @@ function LocationTreeItem({
   function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>) {
     e.preventDefault()
 
+    const url = import.meta.env.VITE_MEDIA_URL + fileUrl
+
     axios
-      .get(fileUrl, {
+      .get(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
       })
-      .then(() => window.open(fileUrl, '_blank'))
+      .then(() => window.open(url, '_blank'))
       .catch(() =>
         showNotification({
           color: 'red',
@@ -312,7 +314,7 @@ function LocationTreeItem({
                 <Text>{name}</Text>
               ) : (
                 <>
-                  <Anchor href={fileUrl} onClick={handleAnchorClick} className={classes.anchor}>
+                  <Anchor href={import.meta.env.VITE_MEDIA_URL + fileUrl} onClick={handleAnchorClick} className={classes.anchor}>
                     {name}
                   </Anchor>
                   {isInEditingMode && itemType === 'lesson' && (
@@ -358,7 +360,7 @@ function LocationTreeItem({
                 editDeadlineFile={editDeadlineFile}
                 deleteDeadlineFile={deleteDeadlineFile}
                 type={itemType}
-                key={child.file_url}
+                key={child.file_upload}
                 item={child}
               />
             ))}

@@ -28,7 +28,7 @@ function fromLocationPayloads(locationResponses: LocationPayload[]): LocationIte
     if (folderName === '') {
       groupedFolder[folderName].forEach((file) => {
         const match = file.file_upload.match(fileExtensionPattern)
-        locations.push(new File(file.id, file.name, match ? match[0] : 'binary', import.meta.env.VITE_MEDIA_URL + file.file_upload, file.in_folder))
+        locations.push(new File(file.id, file.name, match ? match[0] : 'binary', file.file_upload, file.in_folder))
       })
     } else {
       const folder = new Folder(folderId, folderName, '', [])
@@ -36,9 +36,7 @@ function fromLocationPayloads(locationResponses: LocationPayload[]): LocationIte
 
       groupedFolder[folderName].forEach((file) => {
         const match = file.file_upload.match(fileExtensionPattern)
-        folder.children?.push(
-          new File(file.id, file.name, match ? match[0] : 'binary', import.meta.env.VITE_MEDIA_URL + file.file_upload, file.in_folder)
-        )
+        folder.children?.push(new File(file.id, file.name, match ? match[0] : 'binary', file.in_folder))
       })
       locations.push(folder)
     }

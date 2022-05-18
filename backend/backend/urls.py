@@ -26,38 +26,26 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 
 
-# urlpatterns = []
+urlpatterns = []
 
-# if settings.DEBUG:
-#     urlpatterns = [
-#         path("api/", APIStructureView.as_view()),
-#         path("api/account/", include("account.urls")),
-#         path("admin/", admin.site.urls),
-#         path("api/courseAPI/", include("course.urls")),
-#         path("api/deadlineAPI/", include("deadline.urls")),
-#     ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-# else:
-#     urlpatterns = [
-#         path("api/", APIStructureView.as_view()),
-#         path("api/account/", include("account.urls")),
-#         path("admin/", admin.site.urls),
-#         path("api/courseAPI/", include("course.urls")),
-#         path("api/deadlineAPI/", include("deadline.urls")),
-#         path(
-#             "media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",
-#             secureResourceMediaView.as_view(),
-#         ),
-#         path("media/img/<str:image_name>", secureProfileImageMediaView.as_view())
-#     ]
-urlpatterns = [
-    path("api/", APIStructureView.as_view()),
-    path("api/account/", include("account.urls")),
-    path("admin/", admin.site.urls),
-    path("api/courseAPI/", include("course.urls")),
-    path("api/deadlineAPI/", include("deadline.urls")),
-    path(
+if settings.DEBUG:
+    urlpatterns = [
+        path("api/", APIStructureView.as_view()),
+        path("api/account/", include("account.urls")),
+        path("admin/", admin.site.urls),
+        path("api/courseAPI/", include("course.urls")),
+        path("api/deadlineAPI/", include("deadline.urls")),
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    urlpatterns = [
+        path("api/", APIStructureView.as_view()),
+        path("api/account/", include("account.urls")),
+        path("admin/", admin.site.urls),
+        path("api/courseAPI/", include("course.urls")),
+        path("api/deadlineAPI/", include("deadline.urls")),
+        path(
             "media/course_<int:course_pk>/<str:file_uuid>_<str:model_name>_<str:file_name>",
             secureResourceMediaView.as_view(),
         ),
-    path("media/img/<str:image_name>", secureProfileImageMediaView.as_view())
+        path("media/img/<str:image_name>", secureProfileImageMediaView.as_view())
     ]

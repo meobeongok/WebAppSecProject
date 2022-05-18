@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useParams } from 'react-router-dom'
 import { useAxiosInstance } from '@/hooks'
-import type { Deadline, File, Lesson, LessonPayload } from '@/types'
+import type { Deadline, File, Lesson, LessonPayload, DeadlinePayload } from '@/types'
 import { api } from '@/constants'
 import { Button, Card, Center, createStyles, Loader, LoadingOverlay, Modal, TextInput, Title, Tooltip } from '@mantine/core'
 import { LessonItem } from '@/components'
@@ -11,7 +11,15 @@ import { FiPlus } from 'react-icons/fi'
 import axios, { type CancelTokenSource } from 'axios'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
-import { addDeadlineToLessons, addFileToLessons, deleteLessonFile, deleteLessonsDeadline, editLessonsDeadline } from '@/helpers'
+import {
+  addDeadlineToLessons,
+  addFileToLessons,
+  addFileToLessonsDeadline,
+  deleteLessonFile,
+  deleteLessonsDeadline,
+  deleteLessonsDeadlineFile,
+  editLessonsDeadline
+} from '@/helpers'
 import { useDisclosure } from '@mantine/hooks'
 
 const useStyles = createStyles((theme) => ({
@@ -110,14 +118,21 @@ function CourseLessons(): JSX.Element {
       .put<LessonPayload>(`${api.courses}${courseId}/lessons/${lessonId}/`, { ...values, cancelToken: cancelToken.token })
       .then(({ data }) => {
         setLessons((previousValue) => {
-          const newLessons = previousValue.map((lesson) =>
-            lesson.id === data.id
-              ? {
-                  ...data,
-                  locationItems: fromLocationPayloads(data.file_lesson)
-                }
-              : lesson
-          )
+          const newLessons = previousValue.map((lesson) => {
+            if (lesson.id !== data.id) return lesson
+
+            const newDeadlines: Deadline[] = data.deadline_lesson.map((dl) => ({
+              ...dl,
+              locationItems: fromLocationPayloads(dl.file_deadline_lesson)
+            }))
+
+            return {
+              ...data,
+              deadline_lesson: newDeadlines,
+              locationItems: fromLocationPayloads(data.file_lesson)
+            }
+          })
+
           return newLessons
         })
 
@@ -236,12 +251,17 @@ function CourseLessons(): JSX.Element {
 
   function handleCreateDeadline(lessonId: number, values: Record<string, string>, cancelToken: CancelTokenSource): void {
     axiosInstance
-      .post<Deadline>(`/deadlineAPI/${lessonId}/lecturerDeadlines/`, {
+      .post<DeadlinePayload>(`/deadlineAPI/${lessonId}/lecturerDeadlines/`, {
         ...values,
         cancelToken: cancelToken.token
       })
       .then(({ data }) => {
-        setLessons((previousValue) => addDeadlineToLessons(previousValue, lessonId, data))
+        setLessons((previousValue) =>
+          addDeadlineToLessons(previousValue, lessonId, {
+            ...data,
+            locationItems: fromLocationPayloads(data.file_deadline_lesson)
+          })
+        )
         showNotification({
           title: 'Create a deadline success 😁',
           message: 'Yay 😍😍😍'
@@ -258,12 +278,17 @@ function CourseLessons(): JSX.Element {
 
   function handleEditDeadline(lessonId: number, deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource): void {
     axiosInstance
-      .put<Deadline>(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/`, {
+      .put<DeadlinePayload>(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/`, {
         ...values,
         cancelToken: cancelToken.token
       })
       .then(({ data }) => {
-        setLessons((previousValue) => editLessonsDeadline(previousValue, lessonId, deadlineId, data))
+        setLessons((previousValue) =>
+          editLessonsDeadline(previousValue, lessonId, deadlineId, {
+            ...data,
+            locationItems: fromLocationPayloads(data.file_deadline_lesson)
+          })
+        )
         showNotification({
           title: 'Edit a deadline success 😁',
           message: 'Yay 😍😍😍'
@@ -297,19 +322,110 @@ function CourseLessons(): JSX.Element {
       )
   }
 
+  function handleCreateDeadlineFile(lessonId: number, deadlineId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) {
+    axiosInstance
+      .post<File>(
+        `/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/files/`,
+        {
+          ...values,
+          cancelToken: cancelToken.token
+        },
+        {
+          headers: {
+            'content-type': 'multipart/form-data'
+          }
+        }
+      )
+      .then(({ data }) => {
+        setLessons((previousValue) => addFileToLessonsDeadline(previousValue, lessonId, deadlineId, data, true))
+        showNotification({
+          title: 'Create a deadline file success 😁',
+          message: 'Yay 😍😍😍'
+        })
+      })
+      .catch(() => {
+        showNotification({
+          color: 'red',
+          title: 'Create a deadline file failed 😨',
+          message: 'Please try again'
+        })
+      })
+  }
+
+  function handleEditDeadlineFile(
+    lessonId: number,
+    deadlineId: number,
+    fileId: number,
+    values: Record<string, unknown>,
+    cancelToken: CancelTokenSource
+  ) {
+    axiosInstance
+      .put<File>(
+        `/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/files/${fileId}/`,
+        {
+          ...values,
+          cancelToken: cancelToken.token
+        },
+        {
+          headers: {
+            'content-type': 'multipart/form-data'
+          }
+        }
+      )
+      .then(({ data }) => {
+        setLessons((previousValue) =>
+          addFileToLessonsDeadline(deleteLessonsDeadlineFile(previousValue, lessonId, deadlineId, fileId, true), lessonId, deadlineId, data, true)
+        )
+        showNotification({
+          title: 'Edit a deadline file success 😁',
+          message: 'Yay 😍😍😍'
+        })
+      })
+      .catch(() => {
+        showNotification({
+          color: 'red',
+          title: 'Edit a deadline file failed 😨',
+          message: 'Please try again'
+        })
+      })
+  }
+
+  function handleDeleteDeadlineFile(lessonId: number, deadlineId: number, fileId: number, cancelToken: CancelTokenSource): void {
+    axiosInstance
+      .delete(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/files/${fileId}/`, { cancelToken: cancelToken.token })
+      .then(() => {
+        setLessons((previousValue) => deleteLessonsDeadlineFile(previousValue, lessonId, deadlineId, fileId, false))
+        showNotification({
+          title: 'Delete a deadline file success 😁',
+          message: 'Yay 😍😍😍'
+        })
+      })
+      .catch(() =>
+        showNotification({
+          color: 'red',
+          title: 'Delete a deadline file failed 😨',
+          message: 'Please try again'
+        })
+      )
+  }
+
   React.useEffect(() => {
     async function getLessons() {
       axiosInstance.get<LessonPayload[]>(`${api.courses}${courseId}/lessons/`).then(({ data }) => {
-        const newData: Lesson[] = []
+        const newData: Lesson[] = data.map((ls) => {
+          const deadlines = ls.deadline_lesson
 
-        for (const ls of data) {
-          const newLs: Lesson = {
+          const newDeadlines: Deadline[] = deadlines.map((dl) => ({
+            ...dl,
+            locationItems: fromLocationPayloads(dl.file_deadline_lesson)
+          }))
+
+          return {
             ...ls,
+            deadline_lesson: newDeadlines,
             locationItems: fromLocationPayloads(ls.file_lesson)
           }
-
-          newData.push(newLs)
-        }
+        })
 
         setLessons(newData)
         setLoading(false)
@@ -352,6 +468,9 @@ function CourseLessons(): JSX.Element {
                 createDeadline={handleCreateDeadline}
                 editDeadline={handleEditDeadline}
                 deleteDeadline={handleDeleteDeadline}
+                createDeadlineFile={handleCreateDeadlineFile}
+                editDeadlineFile={handleEditDeadlineFile}
+                deleteDeadlineFile={handleDeleteDeadlineFile}
                 key={lesson.id}
                 lesson={lesson}
               />

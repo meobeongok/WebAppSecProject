@@ -23,6 +23,9 @@ interface LessonItemProps {
   createDeadline: (lessonId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
   editDeadline: (lessonId: number, deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
   deleteDeadline: (lessonId: number, deadlineId: number, cancelToken: CancelTokenSource) => void
+  createDeadlineFile: (lessonId: number, deadlineId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
+  editDeadlineFile: (lessonId: number, deadlineId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
+  deleteDeadlineFile: (lessonId: number, deadlineId: number, fileId: number, cancelToken: CancelTokenSource) => void
 }
 
 const useStyles = createStyles((theme) => ({
@@ -85,7 +88,10 @@ function LessonItem({
   deleteFile,
   createDeadline,
   editDeadline,
-  deleteDeadline
+  deleteDeadline,
+  createDeadlineFile,
+  editDeadlineFile,
+  deleteDeadlineFile
 }: LessonItemProps): JSX.Element {
   const { classes } = useStyles()
   const { isInEditingMode } = useEdit()
@@ -296,6 +302,18 @@ function LessonItem({
     deleteDeadline(id, deadlineId, cancelToken)
   }
 
+  function handleCreateDeadlineFile(deadlineId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource): void {
+    createDeadlineFile(id, deadlineId, values, cancelToken)
+  }
+
+  function handleEditDeadlineFile(deadlineId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource): void {
+    editDeadlineFile(id, deadlineId, fileId, values, cancelToken)
+  }
+
+  function handleDeleteDeadlineFile(deadlineId: number, fileId: number, cancelToken: CancelTokenSource): void {
+    deleteDeadlineFile(id, deadlineId, fileId, cancelToken)
+  }
+
   return (
     <>
       <Card className={classes.container}>
@@ -346,7 +364,14 @@ function LessonItem({
               {deadline_lesson.map((dl) => (
                 <span key={dl.id}>
                   <Divider my="sm" />
-                  <DeadlineItem editDeadline={handleEditDeadline} deleteDeadline={handleDeleteDeadline} deadline={dl} />
+                  <DeadlineItem
+                    editDeadline={handleEditDeadline}
+                    deleteDeadline={handleDeleteDeadline}
+                    createFile={handleCreateDeadlineFile}
+                    editFile={handleEditDeadlineFile}
+                    deleteFile={handleDeleteDeadlineFile}
+                    deadline={dl}
+                  />
                 </span>
               ))}
             </div>

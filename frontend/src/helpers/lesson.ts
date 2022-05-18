@@ -82,4 +82,72 @@ function deleteLessonsDeadline(lessons: Lesson[], lessonId: number, deadlineId: 
   return [...newLessons]
 }
 
-export { addFileToLessons, deleteLessonFile, addDeadlineToLessons, editLessonsDeadline, deleteLessonsDeadline }
+function addFileToLessonsDeadline(lessons: Lesson[], lessonId: number, deadlineId: number, file: LocationItem, isSortLocationItem = true) {
+  const newLessons = lessons
+  const lessonIndex = newLessons.findIndex((lesson) => lesson.id === lessonId)
+  const deadlineIndex = newLessons[lessonIndex].deadline_lesson.findIndex((deadline) => deadline.id === deadlineId)
+  const deadlines = newLessons[lessonIndex].deadline_lesson[deadlineIndex]
+
+  if (!file.in_folder) {
+    deadlines.locationItems.push(file)
+  } else {
+    const folderIndex = deadlines.locationItems.findIndex((item) => item.type === 'folder' && item.name === file.in_folder)
+    if (folderIndex > -1) {
+      deadlines.locationItems[folderIndex].children?.push(file)
+    } else {
+      const newFolder = new Folder(-(deadlines.locationItems.length + 1), file.in_folder, '', [file])
+      deadlines.locationItems.push(newFolder)
+    }
+  }
+
+  if (isSortLocationItem) newLessons[lessonIndex].deadline_lesson[deadlineIndex].locationItems = sortLocationItems(deadlines.locationItems)
+
+  return [...newLessons]
+}
+
+function deleteLessonsDeadlineFile(lessons: Lesson[], lessonId: number, deadlineId: number, fileId: number, isSortLocationItem = true) {
+  const newLessons = lessons
+  const lessonIndex = newLessons.findIndex((lesson) => lesson.id === lessonId)
+  const deadlineIndex = newLessons[lessonIndex].deadline_lesson.findIndex((deadline) => deadline.id === deadlineId)
+  const deadlines = newLessons[lessonIndex].deadline_lesson[deadlineIndex]
+
+  let file: LocationItem | undefined = undefined
+  const fileIndex = deadlines.locationItems.findIndex((item) => item.type !== 'folder' && item.id === fileId)
+  if (fileIndex < 0) {
+    for (const folder of deadlines.locationItems.filter((item) => item.type === 'folder')) {
+      if (folder.children) {
+        const tempIndex = folder.children.findIndex((item) => item.id === fileId)
+        if (tempIndex >= 0) {
+          file = folder.children[tempIndex]
+          break
+        }
+      }
+    }
+  } else {
+    file = deadlines.locationItems[fileIndex]
+  }
+
+  if (file && !file.in_folder) deadlines.locationItems.splice(fileIndex, 1)
+  else {
+    const folderIndex = deadlines.locationItems.findIndex((item) => item.type === 'folder' && item.name === file?.in_folder)
+    const folder = deadlines.locationItems[folderIndex]
+    if (folder.children) {
+      if (folder.children.length === 1) deadlines.locationItems.splice(folderIndex, 1)
+      else deadlines.locationItems[folderIndex].children = folder.children.filter((item) => item.id !== file?.id)
+    }
+  }
+
+  if (isSortLocationItem) newLessons[lessonIndex].deadline_lesson[deadlineIndex].locationItems = sortLocationItems(deadlines.locationItems)
+
+  return [...newLessons]
+}
+
+export {
+  addFileToLessons,
+  deleteLessonFile,
+  addDeadlineToLessons,
+  editLessonsDeadline,
+  deleteLessonsDeadline,
+  addFileToLessonsDeadline,
+  deleteLessonsDeadlineFile
+}

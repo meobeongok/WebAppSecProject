@@ -1,5 +1,5 @@
 import type { Course } from './course'
-import type { Deadline } from './deadline'
+import type { Deadline, DeadlinePayload } from './deadline'
 import type { LocationItem, LocationPayload } from './location'
 
 interface LessonPayload {
@@ -7,7 +7,7 @@ interface LessonPayload {
   name: string
   description: string
   course: Course
-  deadline_lesson: Deadline[]
+  deadline_lesson: DeadlinePayload[]
   file_lesson: LocationPayload[]
 }
 

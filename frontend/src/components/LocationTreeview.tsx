@@ -31,18 +31,28 @@ const useLocationTreeviewStyles = createStyles((theme) => ({
 
 interface LocationTreeViewProps {
   items: LocationItem[]
-  type: 'lesson' | 'deadline'
-  editFile: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteFile: (fileId: number, cancelToken: CancelTokenSource) => void
+  type: 'lesson' | 'deadline' | 'none'
+  editFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
+  deleteFile?: (fileId: number, cancelToken: CancelTokenSource) => void
+  editDeadlineFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
+  deleteDeadlineFile?: (fileId: number, cancelToken: CancelTokenSource) => void
 }
 
-function LocationTreeView({ items, type, editFile, deleteFile }: LocationTreeViewProps): JSX.Element {
+function LocationTreeView({ items, type = 'none', editFile, deleteFile, editDeadlineFile, deleteDeadlineFile }: LocationTreeViewProps): JSX.Element {
   const { classes } = useLocationTreeviewStyles()
 
   return (
     <div className={classes.container}>
       {items.map((item) => (
-        <LocationTreeItem deleteFile={deleteFile} editFile={editFile} type={type} key={item.id} item={item} />
+        <LocationTreeItem
+          deleteFile={deleteFile}
+          editFile={editFile}
+          editDeadlineFile={editDeadlineFile}
+          deleteDeadlineFile={deleteDeadlineFile}
+          type={type}
+          key={item.id}
+          item={item}
+        />
       ))}
     </div>
   )
@@ -128,16 +138,20 @@ const useLocationTreeItemStyles = createStyles((theme) => ({
 
 interface LocationTreeItemProps {
   item: LocationItem
-  type: 'lesson' | 'deadline'
-  editFile: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteFile: (fileId: number, cancelToken: CancelTokenSource) => void
+  type: 'lesson' | 'deadline' | 'none'
+  editFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
+  deleteFile?: (fileId: number, cancelToken: CancelTokenSource) => void
+  editDeadlineFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
+  deleteDeadlineFile?: (fileId: number, cancelToken: CancelTokenSource) => void
 }
 
 function LocationTreeItem({
-  item: { id, name, type, children, file_url: fileUrl },
+  item: { id, name, type, children, file_url: fileUrl, in_folder = '' },
   type: itemType,
   editFile,
-  deleteFile
+  deleteFile,
+  editDeadlineFile,
+  deleteDeadlineFile
 }: LocationTreeItemProps): JSX.Element {
   const { classes } = useLocationTreeItemStyles()
   const [isOpen, setOpen] = React.useState<boolean>(false)
@@ -149,8 +163,8 @@ function LocationTreeItem({
     onClose: () => {
       axiosCancelToken.cancel()
       fileEditForm.setValues({
-        name: '',
-        in_folder: '',
+        name,
+        in_folder,
         file_upload: undefined
       })
       setFormSubmitting(false)
@@ -164,14 +178,50 @@ function LocationTreeItem({
     }
   })
 
+  const [isFileDeadlineEditOpened, fileDeadlineEditHandler] = useDisclosure(false, {
+    onClose: () => {
+      axiosCancelToken.cancel()
+      fileDeadlineEditForm.setValues({
+        name,
+        in_folder,
+        file_upload: undefined
+      })
+      setFormSubmitting(false)
+    }
+  })
+
+  const [isDeleteFileDeadlineOpened, deleteFileDeadlineHandler] = useDisclosure(false, {
+    onClose: () => {
+      axiosCancelToken.cancel()
+      setFormSubmitting(false)
+    }
+  })
+
   const fileEditForm = useForm<{
     name: string
     in_folder: string
     file_upload?: File
   }>({
     initialValues: {
-      name: '',
-      in_folder: '',
+      name,
+      in_folder,
+      file_upload: undefined
+    },
+
+    validate: {
+      name: (value) => (value === '' ? 'Name must not empty' : undefined),
+      file_upload: (value) => (value === undefined ? 'File must not empty' : undefined)
+    }
+  })
+
+  const fileDeadlineEditForm = useForm<{
+    name: string
+    in_folder: string
+    file_upload?: File
+  }>({
+    initialValues: {
+      name,
+      in_folder,
       file_upload: undefined
     },
 
@@ -189,7 +239,7 @@ function LocationTreeItem({
     const { hasErrors } = fileEditForm.validate()
     if (hasErrors) return
 
-    editFile(id, fileEditForm.values, axiosCancelToken)
+    if (editFile) editFile(id, fileEditForm.values, axiosCancelToken)
 
     fileEditHandler.close()
   }
@@ -198,7 +248,27 @@ function LocationTreeItem({
     e.preventDefault()
     setFormSubmitting(true)
 
-    deleteFile(id, axiosCancelToken)
+    if (deleteFile) deleteFile(id, axiosCancelToken)
+
+    setFormSubmitting(false)
+  }
+
+  function handleEditDeadlineFile(e: React.FormEvent): void {
+    e.preventDefault()
+
+    const { hasErrors } = fileDeadlineEditForm.validate()
+    if (hasErrors) return
+
+    if (editDeadlineFile) editDeadlineFile(id, fileDeadlineEditForm.values, axiosCancelToken)
+
+    fileDeadlineEditHandler.close()
+  }
+
+  function handleDeleteDeadlineFile(e: React.FormEvent): void {
+    e.preventDefault()
+    setFormSubmitting(true)
+
+    if (deleteDeadlineFile) deleteDeadlineFile(id, axiosCancelToken)
 
     setFormSubmitting(false)
   }
@@ -223,7 +293,7 @@ function LocationTreeItem({
                   <Anchor href={fileUrl} target="_blank" className={classes.anchor}>
                     {name}
                   </Anchor>
-                  {isInEditingMode && (
+                  {isInEditingMode && itemType === 'lesson' && (
                     <ButtonGroup className={classnames(classes.buttonGroup, 'group-hover')}>
                       <Tooltip className="group-button" label="Edit file">
                         <ActionIcon onClick={fileEditHandler.open} size="md" color="dark" variant="outline">
@@ -232,6 +302,20 @@ function LocationTreeItem({
                       </Tooltip>
                       <Tooltip className="group-button" label="Delete file">
                         <ActionIcon onClick={deleteFileHandler.open} size="md" color="red" variant="outline">
+                          <FiX size="0.75rem" />
+                        </ActionIcon>
+                      </Tooltip>
+                    </ButtonGroup>
+                  )}
+                  {isInEditingMode && itemType === 'deadline' && (
+                    <ButtonGroup className={classnames(classes.buttonGroup, 'group-hover')}>
+                      <Tooltip className="group-button" label="Edit file">
+                        <ActionIcon onClick={fileDeadlineEditHandler.open} size="md" color="dark" variant="outline">
+                          <FiEdit size="0.75rem" />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip className="group-button" label="Delete file">
+                        <ActionIcon onClick={deleteFileDeadlineHandler.open} size="md" color="red" variant="outline">
                           <FiX size="0.75rem" />
                         </ActionIcon>
                       </Tooltip>
@@ -246,14 +330,22 @@ function LocationTreeItem({
         {children && isOpen && (
           <div className={classes.children}>
             {children.map((child) => (
-              <LocationTreeItem editFile={editFile} deleteFile={deleteFile} type={itemType} key={child.file_url} item={child} />
+              <LocationTreeItem
+                editFile={editFile}
+                deleteFile={deleteFile}
+                editDeadlineFile={editDeadlineFile}
+                deleteDeadlineFile={deleteDeadlineFile}
+                type={itemType}
+                key={child.file_url}
+                item={child}
+              />
             ))}
           </div>
         )}
       </div>
       {itemType === 'lesson' && (
         <>
-          <Modal title="Edit lesson file" centered opened={isFileEditOpened} onClose={fileEditHandler.close}>
+          <Modal title={`Edit lesson file: ${name}`} centered opened={isFileEditOpened} onClose={fileEditHandler.close}>
             <form onSubmit={handleEditFile}>
               <FileInput
                 required
@@ -282,6 +374,48 @@ function LocationTreeItem({
             <form onSubmit={handleDeleteFile}>
               <div className={classes.formButton}>
                 <Button variant="outline" onClick={deleteFileHandler.close}>
+                  Cancel
+                </Button>
+                <Button color="red" type="submit">
+                  Delete
+                </Button>
+              </div>
+            </form>
+            <LoadingOverlay visible={isFormSubmitting} />
+          </Modal>
+        </>
+      )}
+      {itemType === 'deadline' && (
+        <>
+          <Modal title={`Edit deadline file: ${name}`} centered opened={isFileDeadlineEditOpened} onClose={fileDeadlineEditHandler.close}>
+            <form onSubmit={handleEditDeadlineFile}>
+              <FileInput
+                required
+                label="File"
+                onDrop={(files) => {
+                  fileDeadlineEditForm.setFieldValue('file_upload', files[0])
+
+                  if (fileDeadlineEditForm.values.name === '') {
+                    fileDeadlineEditForm.setFieldValue('name', files[0].name)
+                  }
+                }}
+                {...fileDeadlineEditForm.getInputProps('file_upload')}
+              />
+              <TextInput required label="File name" {...fileDeadlineEditForm.getInputProps('name')} />
+              <TextInput label="In folder" {...fileDeadlineEditForm.getInputProps('in_folder')} />
+              <div className={classes.formButton}>
+                <Button variant="outline" color="red" onClick={fileDeadlineEditHandler.close}>
+                  Cancel
+                </Button>
+                <Button type="submit">Edit</Button>
+              </div>
+            </form>
+            <LoadingOverlay visible={isFormSubmitting} />
+          </Modal>
+          <Modal centered title={`Delete deadline file: ${name}`} opened={isDeleteFileDeadlineOpened} onClose={deleteFileDeadlineHandler.close}>
+            <form onSubmit={handleDeleteDeadlineFile}>
+              <div className={classes.formButton}>
+                <Button variant="outline" onClick={deleteFileDeadlineHandler.close}>
                   Cancel
                 </Button>
                 <Button color="red" type="submit">

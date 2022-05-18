@@ -13,11 +13,16 @@ import dayjs from 'dayjs'
 import { useForm } from '@mantine/form'
 import { useDisclosure } from '@mantine/hooks'
 import axios, { type CancelTokenSource } from 'axios'
+import FileInput from './FileInput'
+import LocationTreeView from './LocationTreeview'
 
 interface DeadlineItemProps {
   deadline: Deadline
   editDeadline: (deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
   deleteDeadline: (deadlineId: number, cancelToken: CancelTokenSource) => void
+  createFile: (deadlineId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
+  editFile: (deadlineId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
+  deleteFile: (deadlineId: number, fileId: number, cancelToken: CancelTokenSource) => void
 }
 
 const useStyles = createStyles((theme) => ({
@@ -69,7 +74,14 @@ const useStyles = createStyles((theme) => ({
   }
 }))
 
-function DeadlineItem({ deadline: { id, name, description, lesson, begin, end }, editDeadline, deleteDeadline }: DeadlineItemProps): JSX.Element {
+function DeadlineItem({
+  deadline: { id, name, description, lesson, begin, end, locationItems },
+  editDeadline,
+  deleteDeadline,
+  createFile,
+  editFile,
+  deleteFile
+}: DeadlineItemProps): JSX.Element {
   const { classes } = useStyles()
   const user = useUserStore((state) => state.user)
   const { isInEditingMode } = useEdit()
@@ -95,6 +107,18 @@ function DeadlineItem({ deadline: { id, name, description, lesson, begin, end },
   const [isDeleteDeadlineOpened, deleteDeadlineHandler] = useDisclosure(false, {
     onClose: () => {
       axiosCancelToken.cancel()
+      setFormLoading(false)
+    }
+  })
+
+  const [isCreateFileOpened, createFileHandler] = useDisclosure(false, {
+    onClose: () => {
+      axiosCancelToken.cancel()
+      createFileForm.setValues({
+        name: '',
+        in_folder: '',
+        file_upload: undefined
+      })
       setFormLoading(false)
     }
   })
@@ -152,6 +176,23 @@ function DeadlineItem({ deadline: { id, name, description, lesson, begin, end },
     }
   })
 
+  const createFileForm = useForm<{
+    name: string
+    in_folder: string
+    file_upload?: File
+  }>({
+    initialValues: {
+      name: '',
+      in_folder: '',
+      file_upload: undefined
+    },
+
+    validate: {
+      name: (value) => (value === '' ? 'Name must not empty' : undefined),
+      file_upload: (value) => (value === undefined ? 'File must not empty' : undefined)
+    }
+  })
+
   const axiosCancelToken = axios.CancelToken.source()
 
   function handleEditDeadline(e: React.FormEvent) {
@@ -187,6 +228,25 @@ function DeadlineItem({ deadline: { id, name, description, lesson, begin, end },
     setFormLoading(false)
   }
 
+  function handleCreateFile(e: React.FormEvent) {
+    e.preventDefault()
+
+    const { hasErrors } = createFileForm.validate()
+    if (hasErrors) return
+
+    createFile(id, createFileForm.values, axiosCancelToken)
+
+    createFileHandler.close()
+  }
+
+  function handleEditFile(fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) {
+    editFile(id, fileId, values, cancelToken)
+  }
+
+  function handleDeleteDeadlineFile(fileId: number, cancelToken: CancelTokenSource) {
+    deleteFile(id, fileId, cancelToken)
+  }
+
   if (user?.is_lecturer) {
     return (
       <>
@@ -202,7 +262,7 @@ function DeadlineItem({ deadline: { id, name, description, lesson, begin, end },
             {isInEditingMode && (
               <ButtonGroup className={classnames(classes.buttonGroup, 'group-hover')}>
                 <Tooltip className="group-button" label="Add deadline file">
-                  <ActionIcon size="md" color="cyan" variant="outline">
+                  <ActionIcon onClick={createFileHandler.open} size="md" color="cyan" variant="outline">
                     <FiPlus size="0.75rem" />
                   </ActionIcon>
                 </Tooltip>
@@ -220,6 +280,9 @@ function DeadlineItem({ deadline: { id, name, description, lesson, begin, end },
             )}
           </div>
           {description && <Text className={classes.description}>{description}</Text>}
+          {locationItems && locationItems.length > 0 && (
+            <LocationTreeView items={locationItems} editDeadlineFile={handleEditFile} deleteDeadlineFile={handleDeleteDeadlineFile} type="deadline" />
+          )}
         </div>
         <Modal title="Edit a deadline" centered opened={isEditDeadlineOpened} onClose={editDeadlineHandler.close}>
           <form className={classes.form} onSubmit={handleEditDeadline}>
@@ -287,6 +350,31 @@ function DeadlineItem({ deadline: { id, name, description, lesson, begin, end },
               <Button color="red" type="submit">
                 Delete
               </Button>
+            </div>
+          </form>
+          <LoadingOverlay visible={isFormLoading} />
+        </Modal>
+        <Modal centered title={`Add file to lesson: ${name}`} opened={isCreateFileOpened} onClose={createFileHandler.close}>
+          <form className={classes.form} onSubmit={handleCreateFile}>
+            <FileInput
+              required
+              label="File"
+              onDrop={(files) => {
+                createFileForm.setFieldValue('file_upload', files[0])
+
+                if (createFileForm.values.name === '') {
+                  createFileForm.setFieldValue('name', files[0].name)
+                }
+              }}
+              {...createFileForm.getInputProps('file_upload')}
+            />
+            <TextInput required label="File name" {...createFileForm.getInputProps('name')} />
+            <TextInput label="In folder" {...createFileForm.getInputProps('in_folder')} />
+            <div className={classes.formButton}>
+              <Button variant="outline" color="red" onClick={createFileHandler.close}>
+                Cancel
+              </Button>
+              <Button type="submit">Create</Button>
             </div>
           </form>
           <LoadingOverlay visible={isFormLoading} />

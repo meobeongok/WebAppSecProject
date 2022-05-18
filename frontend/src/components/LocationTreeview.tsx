@@ -285,9 +285,15 @@ function LocationTreeItem({
       .get(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`
-        }
+        },
+        responseType: 'arraybuffer'
       })
-      .then(() => window.open(url, '_blank'))
+      .then((response) => {
+        const blob = new Blob([response.data], { type: response.headers['content-type'] })
+        const url = window.URL.createObjectURL(blob)
+
+        window.open(url)
+      })
       .catch(() =>
         showNotification({
           color: 'red',

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useParams } from 'react-router-dom'
 import { useAxiosInstance } from '@/hooks'
-import type { Deadline, File, Lesson, LessonPayload, DeadlinePayload } from '@/types'
+import type { Deadline, File, Lesson, LessonPayload, DeadlinePayload, DeadlineSubmitPayload } from '@/types'
 import { api } from '@/constants'
 import { Button, Card, Center, createStyles, Loader, LoadingOverlay, Modal, TextInput, Title, Tooltip } from '@mantine/core'
 import { LessonItem } from '@/components'
@@ -21,6 +21,7 @@ import {
   editLessonsDeadline
 } from '@/helpers'
 import { useDisclosure } from '@mantine/hooks'
+import { useUserStore } from '@/stores'
 
 const useStyles = createStyles((theme) => ({
   items: {
@@ -58,6 +59,7 @@ function CourseLessons(): JSX.Element {
   const axiosInstance = useAxiosInstance()
   const { isInEditingMode } = useEdit()
   const [isFormSubmitting, setFormSubmitting] = React.useState<boolean>(false)
+  const user = useUserStore((state) => state.user)
 
   const [isCreateLessonOpened, createLessonHandler] = useDisclosure(false, {
     onClose: () => {
@@ -96,7 +98,7 @@ function CourseLessons(): JSX.Element {
         })
 
         showNotification({
-          title: 'Create a new lesson success 😆',
+          title: 'Create a new lesson successfully 😆',
           message: 'Yay 😍😍😍'
         })
 
@@ -137,7 +139,7 @@ function CourseLessons(): JSX.Element {
         })
 
         showNotification({
-          title: 'Edit a lesson success 😆',
+          title: 'Edit a lesson successfully 😆',
           message: 'Yay 😍😍😍'
         })
       })
@@ -160,7 +162,7 @@ function CourseLessons(): JSX.Element {
         })
 
         showNotification({
-          title: 'Delete a lesson success 😆',
+          title: 'Delete a lesson successfully 😆',
           message: 'Yay 😍😍😍'
         })
       })
@@ -187,7 +189,7 @@ function CourseLessons(): JSX.Element {
       .then(({ data }) => {
         setLessons((previousValue) => addFileToLessons(previousValue, lessonId, data))
         showNotification({
-          title: 'Create a file success 😁',
+          title: 'Create a file successfully 😁',
           message: 'Yay 😍😍😍'
         })
       })
@@ -217,7 +219,7 @@ function CourseLessons(): JSX.Element {
           return addFileToLessons(value, lessonId, data)
         })
         showNotification({
-          title: 'Edit file success 😁',
+          title: 'Edit file successfully 😁',
           message: 'Yay 😍😍😍'
         })
       })
@@ -236,7 +238,7 @@ function CourseLessons(): JSX.Element {
       .then(() => {
         setLessons((previousValue) => deleteLessonFile(previousValue, lessonId, fileId, false))
         showNotification({
-          title: 'Delete file success 😁',
+          title: 'Delete file successfully 😁',
           message: 'Yay 😍😍😍'
         })
       })
@@ -263,7 +265,7 @@ function CourseLessons(): JSX.Element {
           })
         )
         showNotification({
-          title: 'Create a deadline success 😁',
+          title: 'Create a deadline successfully 😁',
           message: 'Yay 😍😍😍'
         })
       })
@@ -290,7 +292,7 @@ function CourseLessons(): JSX.Element {
           })
         )
         showNotification({
-          title: 'Edit a deadline success 😁',
+          title: 'Edit a deadline successfully 😁',
           message: 'Yay 😍😍😍'
         })
       })
@@ -309,7 +311,7 @@ function CourseLessons(): JSX.Element {
       .then(() => {
         setLessons((previousValue) => deleteLessonsDeadline(previousValue, lessonId, deadlineId))
         showNotification({
-          title: 'Delete a deadline success 😁',
+          title: 'Delete a deadline successfully 😁',
           message: 'Yay 😍😍😍'
         })
       })
@@ -339,7 +341,7 @@ function CourseLessons(): JSX.Element {
       .then(({ data }) => {
         setLessons((previousValue) => addFileToLessonsDeadline(previousValue, lessonId, deadlineId, data, true))
         showNotification({
-          title: 'Create a deadline file success 😁',
+          title: 'Create a deadline file successfully 😁',
           message: 'Yay 😍😍😍'
         })
       })
@@ -377,7 +379,7 @@ function CourseLessons(): JSX.Element {
           addFileToLessonsDeadline(deleteLessonsDeadlineFile(previousValue, lessonId, deadlineId, fileId, true), lessonId, deadlineId, data, true)
         )
         showNotification({
-          title: 'Edit a deadline file success 😁',
+          title: 'Edit a deadline file successfully 😁',
           message: 'Yay 😍😍😍'
         })
       })
@@ -396,7 +398,7 @@ function CourseLessons(): JSX.Element {
       .then(() => {
         setLessons((previousValue) => deleteLessonsDeadlineFile(previousValue, lessonId, deadlineId, fileId, false))
         showNotification({
-          title: 'Delete a deadline file success 😁',
+          title: 'Delete a deadline file successfully 😁',
           message: 'Yay 😍😍😍'
         })
       })
@@ -411,11 +413,15 @@ function CourseLessons(): JSX.Element {
 
   React.useEffect(() => {
     async function getLessons() {
-      axiosInstance.get<LessonPayload[]>(`${api.courses}${courseId}/lessons/`).then(({ data }) => {
-        const newData: Lesson[] = data.map((ls) => {
-          const deadlines = ls.deadline_lesson
+      if (!user) return
 
-          const newDeadlines: Deadline[] = deadlines.map((dl) => ({
+      const data = await axiosInstance.get<LessonPayload[]>(`${api.courses}${courseId}/lessons/`).then(({ data }) => data)
+
+      let newData: Lesson[]
+
+      if (user.is_lecturer) {
+        newData = data.map((ls) => {
+          const newDeadlines: Deadline[] = ls.deadline_lesson.map((dl) => ({
             ...dl,
             locationItems: fromLocationPayloads(dl.file_deadline_lesson)
           }))
@@ -426,14 +432,40 @@ function CourseLessons(): JSX.Element {
             locationItems: fromLocationPayloads(ls.file_lesson)
           }
         })
+      } else {
+        const arr: Promise<DeadlineSubmitPayload[]>[] = []
+        for (const lesson of data) {
+          const promise = axiosInstance.get<DeadlineSubmitPayload[]>(`/deadlineAPI/${lesson.id}/studentDeadlines/`).then(({ data }) => data)
+          arr.push(promise)
+        }
+        const deadlineSubmits = await Promise.all(arr)
 
-        setLessons(newData)
-        setLoading(false)
-      })
+        newData = data.map((ls, index) => {
+          const newDeadlines: Deadline[] = ls.deadline_lesson.map((dl) => {
+            const submit = deadlineSubmits[index].find((submit) => submit.deadline.id === dl.id)
+
+            return {
+              ...dl,
+              submit_id: submit?.id,
+              is_finished: submit?.is_finished,
+              locationItems: fromLocationPayloads(dl.file_deadline_lesson)
+            }
+          })
+
+          return {
+            ...ls,
+            deadline_lesson: newDeadlines,
+            locationItems: fromLocationPayloads(ls.file_lesson)
+          }
+        })
+      }
+
+      setLessons(newData)
+      setLoading(false)
     }
 
     getLessons()
-  }, [])
+  }, [user])
 
   if (isLoading) {
     return (

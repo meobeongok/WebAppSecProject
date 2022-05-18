@@ -4,10 +4,12 @@ import { Text, Tooltip } from '@mantine/core'
 interface RemainTimeProps {
   begin: Date
   end: Date
+  is_finished?: boolean
+  className?: string
   onTimeChange?(isDeadlineOverDue: boolean): void
 }
 
-function RemainTime({ begin, end, onTimeChange }: RemainTimeProps): JSX.Element {
+function RemainTime({ begin, end, is_finished, className, onTimeChange }: RemainTimeProps): JSX.Element {
   const [remainTimeColor, setRemainTimeColor] = React.useState<string>('black')
   const [remainTime, setRemainTime] = React.useState<string>('')
   const hourDivisor = 1000 * 3600
@@ -45,6 +47,7 @@ function RemainTime({ begin, end, onTimeChange }: RemainTimeProps): JSX.Element 
   }
 
   function getRemainTimeColor(dayRemain: number, hourRemain: number) {
+    if (is_finished) return 'green'
     if (new Date() < begin) return 'black'
     if (dayRemain > 0) return 'blue'
     if (hourRemain > 0) return 'yellow'
@@ -53,7 +56,9 @@ function RemainTime({ begin, end, onTimeChange }: RemainTimeProps): JSX.Element 
 
   return (
     <Tooltip label={`${begin.toLocaleDateString()} ${begin.toLocaleTimeString()} - ${end.toLocaleDateString()} ${end.toLocaleTimeString()}`}>
-      <Text color={remainTimeColor}>{remainTime}</Text>
+      <Text className={className} color={remainTimeColor}>
+        {remainTime}
+      </Text>
     </Tooltip>
   )
 }

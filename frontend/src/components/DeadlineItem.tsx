@@ -75,7 +75,7 @@ const useStyles = createStyles((theme) => ({
 }))
 
 function DeadlineItem({
-  deadline: { id, name, description, lesson, begin, end, locationItems },
+  deadline: { id, name, description, lesson, begin, end, locationItems, submit_id, is_finished },
   editDeadline,
   deleteDeadline,
   createFile,
@@ -252,7 +252,7 @@ function DeadlineItem({
       <>
         <div className={classes.container}>
           <div className={classes.header}>
-            <Anchor component={Link} to={`lessons/${lesson}/deadlines`}>
+            <Anchor component={Link} to={`lessons/${lesson}/deadlines/${id}`}>
               {name}
             </Anchor>
             <Text>-</Text>
@@ -354,7 +354,7 @@ function DeadlineItem({
           </form>
           <LoadingOverlay visible={isFormLoading} />
         </Modal>
-        <Modal centered title={`Add file to lesson: ${name}`} opened={isCreateFileOpened} onClose={createFileHandler.close}>
+        <Modal centered title={`Add file to deadline: ${name}`} opened={isCreateFileOpened} onClose={createFileHandler.close}>
           <form className={classes.form} onSubmit={handleCreateFile}>
             <FileInput
               required
@@ -383,14 +383,16 @@ function DeadlineItem({
     )
   }
   return (
-    <div>
+    <div className={classes.container}>
       <div className={classes.header}>
-        <Anchor component={Link} to={`lessons/${lesson}/submitdeadline`}>
+        <Anchor component={Link} to={`lessons/${lesson}/submitdeadline/${submit_id}`}>
           {name}
         </Anchor>
         <Text>-</Text>
-        <RemainTime begin={new Date(begin)} end={new Date(end)} />
+        <RemainTime begin={new Date(begin)} end={new Date(end)} is_finished={is_finished} />
       </div>
+      {description && <Text className={classes.description}>{description}</Text>}
+      {locationItems && locationItems.length > 0 && <LocationTreeView items={locationItems} type="none" />}
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTokenStore, useUserStore } from '@/stores'
 import { useAxiosInstance } from '@/hooks'
 import { api } from '@/constants'
+import { showNotification } from '@mantine/notifications'
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -47,11 +48,24 @@ function NavBar(): JSX.Element {
   const axiosInstance = useAxiosInstance()
 
   async function handleSignOut(): Promise<void> {
-    await axiosInstance.post(api.signOut).then(() => {
-      setUser(undefined)
-      setAccessToken(undefined)
-      navigate('/signin', { replace: true })
-    })
+    await axiosInstance
+      .post(api.signOut)
+      .then(() => {
+        setUser(undefined)
+        setAccessToken(undefined)
+        navigate('/signin', { replace: true })
+        showNotification({
+          title: 'Sign out successfully 😖',
+          message: 'Bye 👋'
+        })
+      })
+      .catch(() =>
+        showNotification({
+          color: 'red',
+          title: 'Sign out error 😡',
+          message: 'Please try again'
+        })
+      )
   }
 
   return (

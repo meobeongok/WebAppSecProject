@@ -155,7 +155,7 @@ function CoursePage(): JSX.Element {
         setPageTitle(data.name)
 
         showNotification({
-          title: 'Edit course success 😒',
+          title: 'Edit course successfully 😒',
           message: 'Yay 😍😍😍'
         })
       })

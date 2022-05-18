@@ -22,14 +22,24 @@ interface Deadline {
   end: string
   create_by: number
   locationItems: LocationItem[]
+  submit_id?: number
+  is_finished?: boolean
+}
+
+interface DeadlineSubmitPayload {
+  id: number
+  is_finished: boolean
+  finish_at?: string
+  file_deadlineSubmit_lesson: LocationPayload[]
+  deadline: DeadlinePayload
 }
 
 interface DeadlineSubmit {
   id: number
   is_finished: boolean
   finish_at?: string
-  file_deadline_submit_lesson: string[]
+  file_deadlineSubmit_lesson: LocationItem[]
   deadline: Deadline
 }
 
-export type { DeadlinePayload, Deadline, DeadlineSubmit }
+export type { DeadlinePayload, Deadline, DeadlineSubmit, DeadlineSubmitPayload }

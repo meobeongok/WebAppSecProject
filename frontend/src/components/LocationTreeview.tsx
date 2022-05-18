@@ -13,6 +13,8 @@ import { useDisclosure } from '@mantine/hooks'
 import axios, { type CancelTokenSource } from 'axios'
 import { useForm } from '@mantine/form'
 import FileInput from './FileInput'
+import { showNotification } from '@mantine/notifications'
+import { useTokenStore } from '@/stores'
 
 const useLocationTreeviewStyles = createStyles((theme) => ({
   container: {
@@ -155,6 +157,7 @@ function LocationTreeItem({
 }: LocationTreeItemProps): JSX.Element {
   const { classes } = useLocationTreeItemStyles()
   const [isOpen, setOpen] = React.useState<boolean>(false)
+  const accessToken = useTokenStore((state) => state.accessToken)
   const { isInEditingMode } = useEdit()
 
   const [isFormSubmitting, setFormSubmitting] = React.useState<boolean>(false)
@@ -273,6 +276,25 @@ function LocationTreeItem({
     setFormSubmitting(false)
   }
 
+  function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault()
+
+    axios
+      .get(fileUrl, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
+      .then(() => window.open(fileUrl, '_blank'))
+      .catch(() =>
+        showNotification({
+          color: 'red',
+          title: 'Not authorized',
+          message: "You don't have permission to view this file"
+        })
+      )
+  }
+
   return (
     <>
       <div className={classes.wrapper}>
@@ -290,7 +312,7 @@ function LocationTreeItem({
                 <Text>{name}</Text>
               ) : (
                 <>
-                  <Anchor href={fileUrl} target="_blank" className={classes.anchor}>
+                  <Anchor href={fileUrl} onClick={handleAnchorClick} className={classes.anchor}>
                     {name}
                   </Anchor>
                   {isInEditingMode && itemType === 'lesson' && (

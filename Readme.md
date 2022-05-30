@@ -164,8 +164,11 @@ cd Web-Application-Project
   - Frontend `.env.local` template
 
     ```
-    VITE_BACKEND_URL=http://127.0.0.1/api
-    VITE_MEDIA_URL=http://127.0.0.1
+    # Frontend config enviroment
+    VITE_BACKEND_URL=http://localhost/api
+    VITE_MEDIA_URL=http://localhost
+    # Nginx config enviroment
+    ALLOWED_METHODS=GET HEAD POST OPTIONS DELETE
     ```
 
   - PostgreSQL `.env.local` template

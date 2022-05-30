@@ -12,7 +12,8 @@ RUN pnpm build
 
 FROM owasp/modsecurity-crs:nginx-alpine
 COPY --from=builder /frontend/dist /usr/share/nginx/html
-RUN rm /etc/nginx/templates/conf.d/default.conf.template
-COPY ./nginx/nginx.conf /etc/nginx/templates/conf.d
-RUN mv /etc/nginx/templates/conf.d/nginx.conf /etc/nginx/templates/conf.d/default.conf.template
+
+COPY ./nginx/templates/default.conf.template /etc/nginx/templates/conf.d/
+COPY ./nginx/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf /opt/owasp-crs/rules/
+
 CMD ["nginx", "-g", "daemon off;"]

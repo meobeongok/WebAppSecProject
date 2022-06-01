@@ -1,4 +1,5 @@
 import type { LocationItem, LocationPayload } from './location'
+import type { User } from './user'
 
 interface DeadlinePayload {
   id: number
@@ -42,4 +43,20 @@ interface DeadlineSubmit {
   deadline: Deadline
 }
 
-export type { DeadlinePayload, Deadline, DeadlineSubmit, DeadlineSubmitPayload }
+interface DeadlineStudentSubmitPayload {
+  id: number
+  is_finished: boolean
+  finish_at?: string
+  file_deadlineSubmit_lesson: LocationPayload[]
+  member: User
+}
+
+interface DeadlineStudentSubmit {
+  id: number
+  is_finished: boolean
+  finish_at?: string
+  file_deadlineSubmit_lesson: LocationItem[]
+  member: User
+}
+
+export type { DeadlinePayload, Deadline, DeadlineSubmit, DeadlineSubmitPayload, DeadlineStudentSubmitPayload, DeadlineStudentSubmit }

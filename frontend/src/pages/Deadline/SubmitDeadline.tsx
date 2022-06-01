@@ -236,11 +236,9 @@ function SubmitDeadline(): JSX.Element {
       })
   }
 
-  function handleDeleteDeadlineFile(fileId: number, cancelToken: CancelTokenSource) {
+  function handleDeleteDeadlineFile(fileId: number) {
     axiosInstance
-      .delete(`/deadlineAPI/${lessonId}/studentDeadlines/${submitDeadline?.id}/files/${fileId}/`, {
-        cancelToken: cancelToken.token
-      })
+      .delete(`/deadlineAPI/${lessonId}/studentDeadlines/${submitDeadline?.id}/files/${fileId}/`)
       .then(() => {
         setSubmitDeadline((previousValue) => deleteSubmitFileDeadline(previousValue, fileId, true))
         showNotification({

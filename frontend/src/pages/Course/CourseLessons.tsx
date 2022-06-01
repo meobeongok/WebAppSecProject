@@ -152,9 +152,9 @@ function CourseLessons(): JSX.Element {
       )
   }
 
-  async function handleDeleteLesson(lessonId: number, cancelToken: CancelTokenSource) {
+  async function handleDeleteLesson(lessonId: number) {
     axiosInstance
-      .delete(`${api.courses}${courseId}/lessons/${lessonId}/`, { cancelToken: cancelToken.token })
+      .delete(`${api.courses}${courseId}/lessons/${lessonId}/`)
       .then(() => {
         setLessons((previousValue) => {
           const newLessons = previousValue.filter((lesson) => lesson.id !== lessonId)
@@ -232,9 +232,9 @@ function CourseLessons(): JSX.Element {
       )
   }
 
-  function handleDeleteFile(lessonId: number, fileId: number, cancelToken: CancelTokenSource): void {
+  function handleDeleteFile(lessonId: number, fileId: number): void {
     axiosInstance
-      .delete(`${api.courses}${courseId}/lessons/${lessonId}/files/${fileId}/`, { cancelToken: cancelToken.token })
+      .delete(`${api.courses}${courseId}/lessons/${lessonId}/files/${fileId}/`)
       .then(() => {
         setLessons((previousValue) => deleteLessonFile(previousValue, lessonId, fileId, false))
         showNotification({
@@ -305,9 +305,9 @@ function CourseLessons(): JSX.Element {
       })
   }
 
-  function handleDeleteDeadline(lessonId: number, deadlineId: number, cancelToken: CancelTokenSource): void {
+  function handleDeleteDeadline(lessonId: number, deadlineId: number): void {
     axiosInstance
-      .delete(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/`, { cancelToken: cancelToken.token })
+      .delete(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/`)
       .then(() => {
         setLessons((previousValue) => deleteLessonsDeadline(previousValue, lessonId, deadlineId))
         showNotification({
@@ -392,9 +392,9 @@ function CourseLessons(): JSX.Element {
       })
   }
 
-  function handleDeleteDeadlineFile(lessonId: number, deadlineId: number, fileId: number, cancelToken: CancelTokenSource): void {
+  function handleDeleteDeadlineFile(lessonId: number, deadlineId: number, fileId: number): void {
     axiosInstance
-      .delete(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/files/${fileId}/`, { cancelToken: cancelToken.token })
+      .delete(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/files/${fileId}/`)
       .then(() => {
         setLessons((previousValue) => deleteLessonsDeadlineFile(previousValue, lessonId, deadlineId, fileId, false))
         showNotification({

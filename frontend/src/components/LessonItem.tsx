@@ -16,16 +16,16 @@ import dayjs from 'dayjs'
 interface LessonItemProps {
   lesson: Lesson
   editLesson: (lessonId: number, cancelToken: CancelTokenSource, values: Record<string, string>) => void
-  deleteLesson: (lessonId: number, cancelToken: CancelTokenSource) => void
+  deleteLesson: (lessonId: number) => void
   createFile: (lessonId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
   editFile: (lessonId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteFile: (lessonId: number, fileId: number, cancelToken: CancelTokenSource) => void
+  deleteFile: (lessonId: number, fileId: number) => void
   createDeadline: (lessonId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
   editDeadline: (lessonId: number, deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
-  deleteDeadline: (lessonId: number, deadlineId: number, cancelToken: CancelTokenSource) => void
+  deleteDeadline: (lessonId: number, deadlineId: number) => void
   createDeadlineFile: (lessonId: number, deadlineId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
   editDeadlineFile: (lessonId: number, deadlineId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteDeadlineFile: (lessonId: number, deadlineId: number, fileId: number, cancelToken: CancelTokenSource) => void
+  deleteDeadlineFile: (lessonId: number, deadlineId: number, fileId: number) => void
 }
 
 const useStyles = createStyles((theme) => ({
@@ -98,9 +98,13 @@ function LessonItem({
 
   const [isFormLoading, setFormLoading] = React.useState<boolean>(false)
 
+  const editLessonCancelToken = axios.CancelToken.source()
+  const createFileCancelToken = axios.CancelToken.source()
+  const createDeadlineCancelToken = axios.CancelToken.source()
+
   const [isEditLessonOpened, editLessonHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
+      editLessonCancelToken.cancel()
       editLessonForm.setValues({
         name,
         description
@@ -111,14 +115,13 @@ function LessonItem({
 
   const [isDeleteLessonOpened, deleteLessonHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       setFormLoading(false)
     }
   })
 
   const [isCreateFileOpened, createFileHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
+      createFileCancelToken.cancel()
       createFileForm.setValues({
         name: '',
         in_folder: '',
@@ -140,7 +143,7 @@ function LessonItem({
       })
     },
     onClose: () => {
-      axiosCancelToken.cancel()
+      createDeadlineCancelToken.cancel()
 
       setFormLoading(false)
     }
@@ -226,8 +229,6 @@ function LessonItem({
     }
   })
 
-  const axiosCancelToken = axios.CancelToken.source()
-
   function handleEditLesson(e: React.FormEvent): void {
     e.preventDefault()
 
@@ -235,7 +236,7 @@ function LessonItem({
     if (hasErrors) return
 
     setFormLoading(true)
-    editLesson(id, axiosCancelToken, editLessonForm.values)
+    editLesson(id, editLessonCancelToken, editLessonForm.values)
 
     editLessonHandler.close()
   }
@@ -245,7 +246,7 @@ function LessonItem({
 
     setFormLoading(true)
 
-    deleteLesson(id, axiosCancelToken)
+    deleteLesson(id)
 
     deleteLessonHandler.close()
   }
@@ -258,7 +259,7 @@ function LessonItem({
 
     setFormLoading(true)
 
-    createFile(id, createFileForm.values, axiosCancelToken)
+    createFile(id, createFileForm.values, createFileCancelToken)
 
     createFileHandler.close()
   }
@@ -267,8 +268,8 @@ function LessonItem({
     editFile(id, fileId, values, cancelToken)
   }
 
-  function handleDeleteFile(fileId: number, cancelToken: CancelTokenSource): void {
-    deleteFile(id, fileId, cancelToken)
+  function handleDeleteFile(fileId: number): void {
+    deleteFile(id, fileId)
   }
 
   function handleCreateDeadline(e: React.FormEvent) {
@@ -288,7 +289,7 @@ function LessonItem({
         begin: dayjs(values.startDate).hour(values.startTime.getHours()).minute(values.startTime.getMinutes()).toISOString(),
         end: dayjs(values.endDate).hour(values.endTime.getHours()).minute(values.endTime.getMinutes()).toISOString()
       },
-      axiosCancelToken
+      editLessonCancelToken
     )
 
     createDeadlineHandler.close()
@@ -298,8 +299,8 @@ function LessonItem({
     editDeadline(id, deadlineId, values, cancelToken)
   }
 
-  function handleDeleteDeadline(deadlineId: number, cancelToken: CancelTokenSource) {
-    deleteDeadline(id, deadlineId, cancelToken)
+  function handleDeleteDeadline(deadlineId: number) {
+    deleteDeadline(id, deadlineId)
   }
 
   function handleCreateDeadlineFile(deadlineId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource): void {
@@ -310,8 +311,8 @@ function LessonItem({
     editDeadlineFile(id, deadlineId, fileId, values, cancelToken)
   }
 
-  function handleDeleteDeadlineFile(deadlineId: number, fileId: number, cancelToken: CancelTokenSource): void {
-    deleteDeadlineFile(id, deadlineId, fileId, cancelToken)
+  function handleDeleteDeadlineFile(deadlineId: number, fileId: number): void {
+    deleteDeadlineFile(id, deadlineId, fileId)
   }
 
   return (

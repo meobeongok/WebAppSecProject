@@ -35,9 +35,9 @@ interface LocationTreeViewProps {
   items: LocationItem[]
   type: 'lesson' | 'deadline' | 'none'
   editFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteFile?: (fileId: number, cancelToken: CancelTokenSource) => void
+  deleteFile?: (fileId: number) => void
   editDeadlineFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteDeadlineFile?: (fileId: number, cancelToken: CancelTokenSource) => void
+  deleteDeadlineFile?: (fileId: number) => void
 }
 
 function LocationTreeView({ items, type = 'none', editFile, deleteFile, editDeadlineFile, deleteDeadlineFile }: LocationTreeViewProps): JSX.Element {
@@ -142,9 +142,9 @@ interface LocationTreeItemProps {
   item: LocationItem
   type: 'lesson' | 'deadline' | 'none'
   editFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteFile?: (fileId: number, cancelToken: CancelTokenSource) => void
+  deleteFile?: (fileId: number) => void
   editDeadlineFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteDeadlineFile?: (fileId: number, cancelToken: CancelTokenSource) => void
+  deleteDeadlineFile?: (fileId: number) => void
 }
 
 function LocationTreeItem({
@@ -162,9 +162,12 @@ function LocationTreeItem({
 
   const [isFormSubmitting, setFormSubmitting] = React.useState<boolean>(false)
 
+  const editFileCancelToken = axios.CancelToken.source()
+  const editDeadlineFileCancelToken = axios.CancelToken.source()
+
   const [isFileEditOpened, fileEditHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
+      editFileCancelToken.cancel()
       fileEditForm.setValues({
         name,
         in_folder,
@@ -176,14 +179,13 @@ function LocationTreeItem({
 
   const [isDeleteFileOpened, deleteFileHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       setFormSubmitting(false)
     }
   })
 
   const [isFileDeadlineEditOpened, fileDeadlineEditHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
+      editDeadlineFileCancelToken.cancel()
       fileDeadlineEditForm.setValues({
         name,
         in_folder,
@@ -195,7 +197,6 @@ function LocationTreeItem({
 
   const [isDeleteFileDeadlineOpened, deleteFileDeadlineHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       setFormSubmitting(false)
     }
   })
@@ -234,15 +235,13 @@ function LocationTreeItem({
     }
   })
 
-  const axiosCancelToken = axios.CancelToken.source()
-
   function handleEditFile(e: React.FormEvent): void {
     e.preventDefault()
 
     const { hasErrors } = fileEditForm.validate()
     if (hasErrors) return
 
-    if (editFile) editFile(id, fileEditForm.values, axiosCancelToken)
+    if (editFile) editFile(id, fileEditForm.values, editFileCancelToken)
 
     fileEditHandler.close()
   }
@@ -251,7 +250,7 @@ function LocationTreeItem({
     e.preventDefault()
     setFormSubmitting(true)
 
-    if (deleteFile) deleteFile(id, axiosCancelToken)
+    if (deleteFile) deleteFile(id)
 
     setFormSubmitting(false)
   }
@@ -262,7 +261,7 @@ function LocationTreeItem({
     const { hasErrors } = fileDeadlineEditForm.validate()
     if (hasErrors) return
 
-    if (editDeadlineFile) editDeadlineFile(id, fileDeadlineEditForm.values, axiosCancelToken)
+    if (editDeadlineFile) editDeadlineFile(id, fileDeadlineEditForm.values, editDeadlineFileCancelToken)
 
     fileDeadlineEditHandler.close()
   }
@@ -271,7 +270,7 @@ function LocationTreeItem({
     e.preventDefault()
     setFormSubmitting(true)
 
-    if (deleteDeadlineFile) deleteDeadlineFile(id, axiosCancelToken)
+    if (deleteDeadlineFile) deleteDeadlineFile(id)
 
     setFormSubmitting(false)
   }

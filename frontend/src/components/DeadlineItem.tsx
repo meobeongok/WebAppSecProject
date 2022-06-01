@@ -19,10 +19,10 @@ import LocationTreeView from './LocationTreeview'
 interface DeadlineItemProps {
   deadline: Deadline
   editDeadline: (deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
-  deleteDeadline: (deadlineId: number, cancelToken: CancelTokenSource) => void
+  deleteDeadline: (deadlineId: number) => void
   createFile: (deadlineId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
   editFile: (deadlineId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteFile: (deadlineId: number, fileId: number, cancelToken: CancelTokenSource) => void
+  deleteFile: (deadlineId: number, fileId: number) => void
 }
 
 const useStyles = createStyles((theme) => ({
@@ -87,6 +87,9 @@ function DeadlineItem({
   const { isInEditingMode } = useEdit()
   const [isFormLoading, setFormLoading] = React.useState<boolean>(false)
 
+  const editDeadlineCancelToken = axios.CancelToken.source()
+  const createFileCancelToken = axios.CancelToken.source()
+
   const [isEditDeadlineOpened, editDeadlineHandler] = useDisclosure(false, {
     onOpen: () => {
       editDeadlineForm.setValues({
@@ -99,21 +102,20 @@ function DeadlineItem({
       })
     },
     onClose: () => {
-      axiosCancelToken.cancel()
+      editDeadlineCancelToken.cancel()
       setFormLoading(false)
     }
   })
 
   const [isDeleteDeadlineOpened, deleteDeadlineHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       setFormLoading(false)
     }
   })
 
   const [isCreateFileOpened, createFileHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
+      createFileCancelToken.cancel()
       createFileForm.setValues({
         name: '',
         in_folder: '',
@@ -193,8 +195,6 @@ function DeadlineItem({
     }
   })
 
-  const axiosCancelToken = axios.CancelToken.source()
-
   function handleEditDeadline(e: React.FormEvent) {
     e.preventDefault()
 
@@ -212,7 +212,7 @@ function DeadlineItem({
         begin: dayjs(values.startDate).hour(values.startTime.getHours()).minute(values.startTime.getMinutes()).toISOString(),
         end: dayjs(values.endDate).hour(values.endTime.getHours()).minute(values.endTime.getMinutes()).toISOString()
       },
-      axiosCancelToken
+      editDeadlineCancelToken
     )
 
     editDeadlineHandler.close()
@@ -223,7 +223,7 @@ function DeadlineItem({
 
     setFormLoading(true)
 
-    deleteDeadline(id, axiosCancelToken)
+    deleteDeadline(id)
 
     setFormLoading(false)
   }
@@ -234,7 +234,7 @@ function DeadlineItem({
     const { hasErrors } = createFileForm.validate()
     if (hasErrors) return
 
-    createFile(id, createFileForm.values, axiosCancelToken)
+    createFile(id, createFileForm.values, createFileCancelToken)
 
     createFileHandler.close()
   }
@@ -243,8 +243,8 @@ function DeadlineItem({
     editFile(id, fileId, values, cancelToken)
   }
 
-  function handleDeleteDeadlineFile(fileId: number, cancelToken: CancelTokenSource) {
-    deleteFile(id, fileId, cancelToken)
+  function handleDeleteDeadlineFile(fileId: number) {
+    deleteFile(id, fileId)
   }
 
   if (user?.is_lecturer) {

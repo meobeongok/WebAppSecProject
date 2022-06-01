@@ -442,9 +442,11 @@ function SubmitDeadline(): JSX.Element {
               <>
                 <Divider mx="md" my="sm" />
                 <div className={classes.submitButtons}>
-                  <Button variant="outline" onClick={createFileHandler.open}>
-                    Add file
-                  </Button>
+                  {!submitDeadline.is_finished && (
+                    <Button variant="outline" onClick={createFileHandler.open}>
+                      Add file
+                    </Button>
+                  )}
                   {submitDeadline.is_finished ? (
                     <Button color="red" onClick={unsubmitDeadlineHandler.open}>
                       Unsubmit

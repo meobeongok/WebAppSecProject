@@ -38,7 +38,7 @@ function CourseItem({ course: { name, id, course_lecturer: courseLecturer } }: C
       {courseLecturer.map((lecturer) => (
         <div key={lecturer.id}>
           <div className={classes.lectureInfo}>
-            <Text>Lecture:</Text>
+            <Text>Lecturer:</Text>
             <Avatar radius="xl" size="sm" src={lecturer.image && import.meta.env.VITE_MEDIA_URL + lecturer.image} />
             <Text>{lecturer.name}</Text>
           </div>

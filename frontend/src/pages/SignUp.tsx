@@ -118,9 +118,7 @@ const useStyles = createStyles((theme) => ({
 
   title: {
     textAlign: 'center'
-  },
-
-  image: {}
+  }
 }))
 
 const genders = [
@@ -135,6 +133,7 @@ function SignUp(): JSX.Element {
   const { classes } = useStyles()
   const navigate = useNavigate()
   const axiosInstance = useAxiosInstance()
+  const [isFormLoading, setFormLoading] = React.useState(false)
 
   const form = useForm<{
     code: string
@@ -170,8 +169,13 @@ function SignUp(): JSX.Element {
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault()
 
+    setFormLoading(true)
+
     const { hasErrors } = form.validate()
-    if (hasErrors) return
+    if (hasErrors) {
+      setFormLoading(false)
+      return
+    }
 
     axiosInstance
       .post(api.signUp, form.values, {
@@ -211,6 +215,7 @@ function SignUp(): JSX.Element {
           form.setErrors(errors)
         }
       })
+      .then(() => setFormLoading(false))
   }
 
   return (
@@ -227,10 +232,27 @@ function SignUp(): JSX.Element {
               id="email"
               icon={<FiAtSign />}
               placeholder="Your email"
+              disabled={isFormLoading}
               {...form.getInputProps('email')}
             />
-            <TextInput required label="Name" id="name" icon={<FiUser />} placeholder="Your name" {...form.getInputProps('name')} />
-            <Select required label="Gender" placeholder="Your gender" icon={<FiFlag />} data={genders} {...form.getInputProps('gender')} />
+            <TextInput
+              required
+              label="Name"
+              id="name"
+              icon={<FiUser />}
+              placeholder="Your name"
+              disabled={isFormLoading}
+              {...form.getInputProps('name')}
+            />
+            <Select
+              required
+              label="Gender"
+              placeholder="Your gender"
+              icon={<FiFlag />}
+              data={genders}
+              disabled={isFormLoading}
+              {...form.getInputProps('gender')}
+            />
             <PasswordInput
               required
               autoComplete="new-password"
@@ -239,6 +261,7 @@ function SignUp(): JSX.Element {
               placeholder="Your password"
               icon={<FiLock />}
               toggleTabIndex={0}
+              disabled={isFormLoading}
               {...form.getInputProps('password')}
             />
             <PasswordInput
@@ -249,16 +272,18 @@ function SignUp(): JSX.Element {
               placeholder="Your confirm password"
               icon={<FiLock />}
               toggleTabIndex={0}
+              disabled={isFormLoading}
               {...form.getInputProps('confirm_password')}
             />
             <FileInput
               label="Avatar"
+              disabled={isFormLoading}
               onDrop={(files) => {
                 form.setFieldValue('image', files[0])
               }}
               accept={['image/png', 'image/jpeg']}
             />
-            <Button className={classes.button} type="submit">
+            <Button className={classes.button} type="submit" loading={isFormLoading}>
               Sign up 🙃
             </Button>
           </form>

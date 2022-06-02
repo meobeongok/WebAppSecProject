@@ -10,9 +10,9 @@ import ButtonGroup from './ButtonGroup'
 import classnames from 'clsx'
 import { useEdit } from '@/contexts'
 import { useDisclosure } from '@mantine/hooks'
-import axios, { type CancelTokenSource } from 'axios'
 import { useForm } from '@mantine/form'
 import FileInput from './FileInput'
+import axios from 'axios'
 import { showNotification } from '@mantine/notifications'
 import { useTokenStore } from '@/stores'
 
@@ -34,10 +34,10 @@ const useLocationTreeviewStyles = createStyles((theme) => ({
 interface LocationTreeViewProps {
   items: LocationItem[]
   type: 'lesson' | 'deadline' | 'none'
-  editFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteFile?: (fileId: number) => void
-  editDeadlineFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteDeadlineFile?: (fileId: number) => void
+  editFile?: (fileId: number, values: Record<string, unknown>, callback: () => void) => void
+  deleteFile?: (fileId: number, callback: () => void) => void
+  editDeadlineFile?: (fileId: number, values: Record<string, unknown>, callback: () => void) => void
+  deleteDeadlineFile?: (fileId: number, callback: () => void) => void
 }
 
 function LocationTreeView({ items, type = 'none', editFile, deleteFile, editDeadlineFile, deleteDeadlineFile }: LocationTreeViewProps): JSX.Element {
@@ -141,10 +141,10 @@ const useLocationTreeItemStyles = createStyles((theme) => ({
 interface LocationTreeItemProps {
   item: LocationItem
   type: 'lesson' | 'deadline' | 'none'
-  editFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteFile?: (fileId: number) => void
-  editDeadlineFile?: (fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteDeadlineFile?: (fileId: number) => void
+  editFile?: (fileId: number, values: Record<string, unknown>, callback: () => void) => void
+  deleteFile?: (fileId: number, callback: () => void) => void
+  editDeadlineFile?: (fileId: number, values: Record<string, unknown>, callback: () => void) => void
+  deleteDeadlineFile?: (fileId: number, callback: () => void) => void
 }
 
 function LocationTreeItem({
@@ -162,12 +162,8 @@ function LocationTreeItem({
 
   const [isFormSubmitting, setFormSubmitting] = React.useState<boolean>(false)
 
-  const editFileCancelToken = axios.CancelToken.source()
-  const editDeadlineFileCancelToken = axios.CancelToken.source()
-
   const [isFileEditOpened, fileEditHandler] = useDisclosure(false, {
     onClose: () => {
-      editFileCancelToken.cancel()
       fileEditForm.setValues({
         name,
         in_folder,
@@ -185,7 +181,6 @@ function LocationTreeItem({
 
   const [isFileDeadlineEditOpened, fileDeadlineEditHandler] = useDisclosure(false, {
     onClose: () => {
-      editDeadlineFileCancelToken.cancel()
       fileDeadlineEditForm.setValues({
         name,
         in_folder,
@@ -241,18 +236,14 @@ function LocationTreeItem({
     const { hasErrors } = fileEditForm.validate()
     if (hasErrors) return
 
-    if (editFile) editFile(id, fileEditForm.values, editFileCancelToken)
-
-    fileEditHandler.close()
+    if (editFile) editFile(id, fileEditForm.values, fileEditHandler.close)
   }
 
   function handleDeleteFile(e: React.FormEvent): void {
     e.preventDefault()
     setFormSubmitting(true)
 
-    if (deleteFile) deleteFile(id)
-
-    setFormSubmitting(false)
+    if (deleteFile) deleteFile(id, () => setFormSubmitting(false))
   }
 
   function handleEditDeadlineFile(e: React.FormEvent): void {
@@ -261,18 +252,14 @@ function LocationTreeItem({
     const { hasErrors } = fileDeadlineEditForm.validate()
     if (hasErrors) return
 
-    if (editDeadlineFile) editDeadlineFile(id, fileDeadlineEditForm.values, editDeadlineFileCancelToken)
-
-    fileDeadlineEditHandler.close()
+    if (editDeadlineFile) editDeadlineFile(id, fileDeadlineEditForm.values, fileDeadlineEditHandler.close)
   }
 
   function handleDeleteDeadlineFile(e: React.FormEvent): void {
     e.preventDefault()
     setFormSubmitting(true)
 
-    if (deleteDeadlineFile) deleteDeadlineFile(id)
-
-    setFormSubmitting(false)
+    if (deleteDeadlineFile) deleteDeadlineFile(id, () => setFormSubmitting(false))
   }
 
   function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>) {

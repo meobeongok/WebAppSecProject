@@ -80,8 +80,8 @@ function LecturerDeadline(): JSX.Element {
             }))
           )
         })
-
-      setStudentSubmitsLoading(false)
+        .catch()
+        .then(() => setStudentSubmitsLoading(false))
     }
 
     getStudentDeadlineStatus()

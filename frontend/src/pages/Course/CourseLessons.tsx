@@ -8,7 +8,6 @@ import { LessonItem } from '@/components'
 import { fromLocationPayloads } from '@/helpers/location'
 import { useEdit } from '@/contexts'
 import { FiPlus } from 'react-icons/fi'
-import axios, { type CancelTokenSource } from 'axios'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
 import {
@@ -63,7 +62,6 @@ function CourseLessons(): JSX.Element {
 
   const [isCreateLessonOpened, createLessonHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       setFormSubmitting(false)
     }
   })
@@ -78,8 +76,6 @@ function CourseLessons(): JSX.Element {
     }
   })
 
-  const axiosCancelToken = axios.CancelToken.source()
-
   function handleCreateLesson(e: React.FormEvent): void {
     e.preventDefault()
 
@@ -89,7 +85,7 @@ function CourseLessons(): JSX.Element {
     setFormSubmitting(true)
 
     axiosInstance
-      .post<Lesson>(`${api.courses}${courseId}/lessons/`, { ...createLessonForm.values, cancelToken: axiosCancelToken })
+      .post<Lesson>(`${api.courses}${courseId}/lessons/`, { ...createLessonForm.values })
       .then(({ data }) => {
         setLessons((previousValue) => {
           const newLessons = [...previousValue]
@@ -111,13 +107,12 @@ function CourseLessons(): JSX.Element {
           message: 'Please try again'
         })
       )
-
-    createLessonHandler.close()
+      .then(() => createLessonHandler.close())
   }
 
-  function handleEditLesson(lessonId: number, cancelToken: CancelTokenSource, values: Record<string, string>): void {
+  function handleEditLesson(lessonId: number, values: Record<string, string>, callback: () => void): void {
     axiosInstance
-      .put<LessonPayload>(`${api.courses}${courseId}/lessons/${lessonId}/`, { ...values, cancelToken: cancelToken.token })
+      .put<LessonPayload>(`${api.courses}${courseId}/lessons/${lessonId}/`, { ...values })
       .then(({ data }) => {
         setLessons((previousValue) => {
           const newLessons = previousValue.map((lesson) => {
@@ -150,9 +145,10 @@ function CourseLessons(): JSX.Element {
           message: 'Please try again'
         })
       )
+      .then(() => callback())
   }
 
-  async function handleDeleteLesson(lessonId: number) {
+  async function handleDeleteLesson(lessonId: number, callback: () => void) {
     axiosInstance
       .delete(`${api.courses}${courseId}/lessons/${lessonId}/`)
       .then(() => {
@@ -173,13 +169,14 @@ function CourseLessons(): JSX.Element {
           message: 'Please try again'
         })
       )
+      .then(() => callback())
   }
 
-  function handleCreateFile(lessonId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource): void {
+  function handleCreateFile(lessonId: number, values: Record<string, unknown>, callback: () => void): void {
     axiosInstance
       .post<File>(
         `${api.courses}${courseId}/lessons/${lessonId}/files/`,
-        { ...values, cancelToken: cancelToken.token },
+        { ...values },
         {
           headers: {
             'content-type': 'multipart/form-data'
@@ -200,13 +197,14 @@ function CourseLessons(): JSX.Element {
           message: 'Please try again'
         })
       )
+      .then(() => callback())
   }
 
-  function handleEditFile(lessonId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource): void {
+  function handleEditFile(lessonId: number, fileId: number, values: Record<string, unknown>, callback: () => void): void {
     axiosInstance
       .put<File>(
         `${api.courses}${courseId}/lessons/${lessonId}/files/${fileId}/`,
-        { ...values, cancelToken: cancelToken.token },
+        { ...values },
         {
           headers: {
             'content-type': 'multipart/form-data'
@@ -230,6 +228,7 @@ function CourseLessons(): JSX.Element {
           message: 'Please try again'
         })
       )
+      .then(() => callback())
   }
 
   function handleDeleteFile(lessonId: number, fileId: number): void {
@@ -251,12 +250,9 @@ function CourseLessons(): JSX.Element {
       )
   }
 
-  function handleCreateDeadline(lessonId: number, values: Record<string, string>, cancelToken: CancelTokenSource): void {
+  function handleCreateDeadline(lessonId: number, values: Record<string, string>, callback: () => void): void {
     axiosInstance
-      .post<DeadlinePayload>(`/deadlineAPI/${lessonId}/lecturerDeadlines/`, {
-        ...values,
-        cancelToken: cancelToken.token
-      })
+      .post<DeadlinePayload>(`/deadlineAPI/${lessonId}/lecturerDeadlines/`, { ...values })
       .then(({ data }) => {
         setLessons((previousValue) =>
           addDeadlineToLessons(previousValue, lessonId, {
@@ -276,14 +272,12 @@ function CourseLessons(): JSX.Element {
           message: 'Please try again'
         })
       })
+      .then(() => callback())
   }
 
-  function handleEditDeadline(lessonId: number, deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource): void {
+  function handleEditDeadline(lessonId: number, deadlineId: number, values: Record<string, string>, callback: () => void): void {
     axiosInstance
-      .put<DeadlinePayload>(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/`, {
-        ...values,
-        cancelToken: cancelToken.token
-      })
+      .put<DeadlinePayload>(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/`, { ...values })
       .then(({ data }) => {
         setLessons((previousValue) =>
           editLessonsDeadline(previousValue, lessonId, deadlineId, {
@@ -303,9 +297,10 @@ function CourseLessons(): JSX.Element {
           message: 'Please try again'
         })
       })
+      .then(() => callback())
   }
 
-  function handleDeleteDeadline(lessonId: number, deadlineId: number): void {
+  function handleDeleteDeadline(lessonId: number, deadlineId: number, callback: () => void): void {
     axiosInstance
       .delete(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/`)
       .then(() => {
@@ -322,16 +317,14 @@ function CourseLessons(): JSX.Element {
           message: 'Please try again'
         })
       )
+      .then(() => callback())
   }
 
-  function handleCreateDeadlineFile(lessonId: number, deadlineId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) {
+  function handleCreateDeadlineFile(lessonId: number, deadlineId: number, values: Record<string, unknown>, callback: () => void) {
     axiosInstance
       .post<File>(
         `/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/files/`,
-        {
-          ...values,
-          cancelToken: cancelToken.token
-        },
+        { ...values },
         {
           headers: {
             'content-type': 'multipart/form-data'
@@ -352,22 +345,14 @@ function CourseLessons(): JSX.Element {
           message: 'Please try again'
         })
       })
+      .then(() => callback())
   }
 
-  function handleEditDeadlineFile(
-    lessonId: number,
-    deadlineId: number,
-    fileId: number,
-    values: Record<string, unknown>,
-    cancelToken: CancelTokenSource
-  ) {
+  function handleEditDeadlineFile(lessonId: number, deadlineId: number, fileId: number, values: Record<string, unknown>, callback: () => void) {
     axiosInstance
       .put<File>(
         `/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/files/${fileId}/`,
-        {
-          ...values,
-          cancelToken: cancelToken.token
-        },
+        { ...values },
         {
           headers: {
             'content-type': 'multipart/form-data'
@@ -390,9 +375,10 @@ function CourseLessons(): JSX.Element {
           message: 'Please try again'
         })
       })
+      .then(() => callback())
   }
 
-  function handleDeleteDeadlineFile(lessonId: number, deadlineId: number, fileId: number): void {
+  function handleDeleteDeadlineFile(lessonId: number, deadlineId: number, fileId: number, callback: () => void): void {
     axiosInstance
       .delete(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/files/${fileId}/`)
       .then(() => {
@@ -409,6 +395,7 @@ function CourseLessons(): JSX.Element {
           message: 'Please try again'
         })
       )
+      .then(() => callback())
   }
 
   React.useEffect(() => {

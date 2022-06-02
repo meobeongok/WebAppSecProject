@@ -47,10 +47,11 @@ const useFileInputStyles = createStyles({
 
 type FileInputProps = Omit<InputWrapperProps, 'children' | 'onDrop'> & {
   accept?: string[]
+  disabled?: boolean
   onDrop: (files: File[]) => void
 }
 
-function FileInput({ onDrop, ...props }: FileInputProps): JSX.Element {
+function FileInput({ onDrop, disabled, ...props }: FileInputProps): JSX.Element {
   const { classes } = useFileInputStyles()
 
   const [file, setFile] = React.useState<File>()
@@ -62,7 +63,7 @@ function FileInput({ onDrop, ...props }: FileInputProps): JSX.Element {
 
   return (
     <InputWrapper {...props}>
-      <Dropzone className={classes.dropzone} multiple={false} onDrop={handleDrop}>
+      <Dropzone disabled={disabled} className={classes.dropzone} multiple={false} onDrop={handleDrop}>
         {(status) => <FileInputContent status={status} file={file} />}
       </Dropzone>
     </InputWrapper>

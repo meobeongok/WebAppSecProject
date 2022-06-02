@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 from course.models import Lesson
 from deadline.models import Deadline, DeadlineSubmit
-# from .validators import FileExtensionValidator, FileContentTypeValidator
+from .validators import FileExtensionValidator, FileContentTypeValidator
 
 # Create your models here.
 

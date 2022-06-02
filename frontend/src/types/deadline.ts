@@ -3,7 +3,15 @@ import type { User } from './user'
 
 interface DeadlinePayload {
   id: number
-  lesson: number
+  lesson: {
+    id: number
+    name: string
+    course: {
+      id: number
+      mskh: string
+      name: string
+    }
+  }
   name: string
   description: string
   create_at: string
@@ -15,7 +23,15 @@ interface DeadlinePayload {
 
 interface Deadline {
   id: number
-  lesson: number
+  lesson: {
+    id: number
+    name: string
+    course: {
+      id: number
+      mskh: string
+      name: string
+    }
+  }
   name: string
   description: string
   create_at: string
@@ -25,6 +41,9 @@ interface Deadline {
   locationItems: LocationItem[]
   submit_id?: number
   is_finished?: boolean
+  lessonName?: string
+  courseName?: string
+  courseId?: number
 }
 
 interface DeadlineSubmitPayload {

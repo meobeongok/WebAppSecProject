@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useParams } from 'react-router-dom'
+import { matchRoutes, useLocation, useParams } from 'react-router-dom'
 import { useAxiosInstance } from '@/hooks'
 import type { Deadline, File, Lesson, LessonPayload, DeadlinePayload, DeadlineSubmitPayload } from '@/types'
 import { api } from '@/constants'
@@ -59,6 +59,7 @@ function CourseLessons(): JSX.Element {
   const { isInEditingMode } = useEdit()
   const [isFormSubmitting, setFormSubmitting] = React.useState<boolean>(false)
   const user = useUserStore((state) => state.user)
+  const location = useLocation()
 
   const [isCreateLessonOpened, createLessonHandler] = useDisclosure(false, {
     onClose: () => {
@@ -400,7 +401,7 @@ function CourseLessons(): JSX.Element {
 
   React.useEffect(() => {
     async function getLessons() {
-      if (!user) return
+      if (!user || !matchRoutes([{ path: '/courses/:courseId' }], location.pathname)) return
 
       const data = await axiosInstance.get<LessonPayload[]>(`${api.courses}${courseId}/lessons/`).then(({ data }) => data)
 
@@ -452,7 +453,7 @@ function CourseLessons(): JSX.Element {
     }
 
     getLessons()
-  }, [user])
+  }, [user, location.pathname])
 
   if (isLoading) {
     return (

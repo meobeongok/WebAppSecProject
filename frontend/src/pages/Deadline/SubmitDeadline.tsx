@@ -5,7 +5,7 @@ import { useUserStore } from '@/stores'
 import type { DeadlineSubmit, DeadlineSubmitPayload, File as DeadlineFile } from '@/types'
 import { Center, createStyles, Loader, Title, Text, Card, Divider, Button, Modal, TextInput, LoadingOverlay } from '@mantine/core'
 import * as React from 'react'
-import { useParams } from 'react-router-dom'
+import { matchRoutes, useLocation, useParams } from 'react-router-dom'
 import classnames from 'clsx'
 import { showNotification } from '@mantine/notifications'
 import { useDisclosure } from '@mantine/hooks'
@@ -112,6 +112,8 @@ function SubmitDeadline(): JSX.Element {
   const { lessonId: lessonIdStr, submitId: submitIdStr } = useParams() as { lessonId: string; submitId: string }
   const lessonId = Number(lessonIdStr)
   const submitId = Number(submitIdStr)
+
+  const location = useLocation()
 
   const { setInEditingMode } = useEdit()
 
@@ -327,6 +329,7 @@ function SubmitDeadline(): JSX.Element {
 
   React.useEffect(() => {
     if (user === undefined || user.is_lecturer) return
+    if (!matchRoutes([{ path: '/courses/:courseId/lessons/:lessonId/submitdeadline/:submitId' }], location.pathname)) return
 
     async function getSubmitDeadline() {
       axiosInstance
@@ -348,7 +351,7 @@ function SubmitDeadline(): JSX.Element {
     }
 
     getSubmitDeadline()
-  }, [user])
+  }, [user, location.pathname])
 
   React.useEffect(() => {
     if (!submitDeadline) return

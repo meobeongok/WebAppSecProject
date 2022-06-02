@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useAxiosInstance } from '@/hooks'
-import { useParams } from 'react-router-dom'
+import { matchRoutes, useLocation, useParams } from 'react-router-dom'
 import type { Deadline, DeadlinePayload, DeadlineStudentSubmit, DeadlineStudentSubmitPayload } from '@/types/deadline'
 import { fromLocationPayloads } from '@/helpers'
 import { Card, Center, createStyles, Divider, Loader, Text, Title } from '@mantine/core'
@@ -55,11 +55,15 @@ function LecturerDeadline(): JSX.Element {
   const [studentSubmits, setStudentSubmits] = React.useState<DeadlineStudentSubmit[]>()
   const axiosInstance = useAxiosInstance()
 
+  const location = useLocation()
+
   function handleRemainTimeChange(isDeadlineOverDue: boolean): void {
     setOverDue(isDeadlineOverDue)
   }
 
   React.useEffect(() => {
+    if (!matchRoutes([{ path: '/courses/:courseId/lessons/:lessonId/deadlines/:deadlineId' }], location.pathname)) return
+
     async function getStudentDeadlineStatus() {
       await axiosInstance.get<DeadlinePayload>(`/deadlineAPI/${lessonId}/lecturerDeadlines/${deadlineId}/`).then(({ data }) => {
         setDeadline({
@@ -85,7 +89,7 @@ function LecturerDeadline(): JSX.Element {
     }
 
     getStudentDeadlineStatus()
-  }, [])
+  }, [location.pathname])
 
   if (isLoading) {
     return (

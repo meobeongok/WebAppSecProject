@@ -142,6 +142,17 @@ function deleteLessonsDeadlineFile(lessons: Lesson[], lessonId: number, deadline
   return [...newLessons]
 }
 
+function addCourseNameToLesson(lessons: Lesson[], courseName: string): Lesson[] {
+  const newLessons: Lesson[] = []
+  for (let i = 0; i < lessons.length; i++) {
+    newLessons.push({
+      ...lessons[i],
+      courseName
+    })
+  }
+  return newLessons
+}
+
 export {
   addFileToLessons,
   deleteLessonFile,
@@ -149,5 +160,6 @@ export {
   editLessonsDeadline,
   deleteLessonsDeadline,
   addFileToLessonsDeadline,
-  deleteLessonsDeadlineFile
+  deleteLessonsDeadlineFile,
+  addCourseNameToLesson
 }

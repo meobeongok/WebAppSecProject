@@ -353,8 +353,8 @@ function SubmitDeadline(): JSX.Element {
   React.useEffect(() => {
     if (!submitDeadline) return
 
-    setInEditingMode(!submitDeadline.is_finished)
-  }, [submitDeadline])
+    setInEditingMode(!submitDeadline.is_finished && !isOverDue)
+  }, [submitDeadline, isOverDue])
 
   if (isLoading) {
     return (
@@ -398,7 +398,7 @@ function SubmitDeadline(): JSX.Element {
                 submitDeadline.deadline.end
               ).toLocaleTimeString()}`}</Text>
               <Text className={classnames('submit-child', classes.headerItem)}>Finish at</Text>
-              <Text className="submit-child">{submitDeadline.finish_at ?? 'None'}</Text>
+              <Text className="submit-child">{submitDeadline.finish_at ? new Date(submitDeadline.finish_at).toLocaleString() : 'None'}</Text>
             </div>
           </Card>
           <Card className={classes.submitFileContainer}>

@@ -1,18 +1,25 @@
 import * as React from 'react'
-import { useTokenStore } from '@/stores'
+import { useTokenStore, useUserStore } from '@/stores'
 import { useAxiosInstance } from '@/hooks'
 import { LoadingOverlay } from '@mantine/core'
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { matchRoutes, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { api } from '@/constants'
 import type { TokenPayload } from '@/types'
+import { useEdit } from '@/contexts'
+
+const studentRoutes = [{ path: '/courses/:courseId/lessons/:lessonId/submitdeadline/:submitId' }, { path: '/user/deadlines' }]
+const lecturerRoutes = [{ path: 'lessons/:lessonId/deadlines/:deadlineId' }]
 
 function PrivateElement(): JSX.Element {
   const [isAuthComplete, setAuthComplete] = React.useState<boolean>(false)
 
   const location = useLocation()
+  const navigate = useNavigate()
+  const { isInEditingMode, setInEditingMode } = useEdit()
 
   const axiosInstance = useAxiosInstance()
 
+  const user = useUserStore((state) => state.user)
   const accessToken = useTokenStore((state) => state.accessToken)
   const setAccessToken = useTokenStore((state) => state.setAccessToken)
 
@@ -35,6 +42,28 @@ function PrivateElement(): JSX.Element {
 
     getTokens()
   }, [accessToken])
+
+  React.useEffect(() => {
+    if (user === undefined) return
+    if (user.is_lecturer) {
+      if (matchRoutes(studentRoutes, location)) {
+        navigate('/404', { replace: true })
+      }
+    } else {
+      if (matchRoutes(lecturerRoutes, location)) {
+        navigate('/404', { replace: true })
+      }
+    }
+  }, [user, location.pathname])
+
+  React.useEffect(() => {
+    if (user === undefined) return
+    if (!user.is_lecturer) {
+      if (!matchRoutes(studentRoutes.slice(0, 1), location) && isInEditingMode) {
+        setInEditingMode(false)
+      }
+    }
+  }, [user, location.pathname])
 
   if (!isAuthComplete) return <LoadingOverlay visible />
 

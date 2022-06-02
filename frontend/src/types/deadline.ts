@@ -59,4 +59,36 @@ interface DeadlineStudentSubmit {
   member: User
 }
 
-export type { DeadlinePayload, Deadline, DeadlineSubmit, DeadlineSubmitPayload, DeadlineStudentSubmitPayload, DeadlineStudentSubmit }
+interface DeadlineSubmitProfile {
+  id: number
+  is_finished: boolean
+  finish_at?: string
+  deadline: {
+    id: number
+    lesson: {
+      id: number
+      course: {
+        id: number
+      }
+    }
+    name: string
+    description: string
+    create_at: string
+    begin: string
+    end: string
+    create_by: number
+    locationItems: LocationItem[]
+    submit_id?: number
+    is_finished?: boolean
+  }
+}
+
+export type {
+  DeadlinePayload,
+  Deadline,
+  DeadlineSubmit,
+  DeadlineSubmitPayload,
+  DeadlineStudentSubmitPayload,
+  DeadlineStudentSubmit,
+  DeadlineSubmitProfile
+}

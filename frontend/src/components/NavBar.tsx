@@ -85,11 +85,19 @@ function NavBar(): JSX.Element {
                 </Tooltip>
               }
             >
-              <Menu.Item>{user.name}</Menu.Item>
+              <Menu.Item component={Link} to={`/user`}>
+                {user.name}
+              </Menu.Item>
               <Divider />
-              <Menu.Item>Your profile</Menu.Item>
-              <Menu.Item>Your course</Menu.Item>
-              <Menu.Item>Your deadlines</Menu.Item>
+              <Menu.Item component={Link} to={`/user`}>
+                Your profile
+              </Menu.Item>
+              <Menu.Item component={Link} to={`/user/courses`}>
+                Your course
+              </Menu.Item>
+              <Menu.Item component={Link} to={`/user/deadlines`}>
+                Your deadlines
+              </Menu.Item>
               <Divider />
               <Menu.Item onClick={handleSignOut}>Sign out</Menu.Item>
             </Menu>

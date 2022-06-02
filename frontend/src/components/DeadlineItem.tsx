@@ -12,17 +12,16 @@ import { DatePicker, TimeInput } from '@mantine/dates'
 import dayjs from 'dayjs'
 import { useForm } from '@mantine/form'
 import { useDisclosure } from '@mantine/hooks'
-import axios, { type CancelTokenSource } from 'axios'
 import FileInput from './FileInput'
 import LocationTreeView from './LocationTreeview'
 
 interface DeadlineItemProps {
   deadline: Deadline
-  editDeadline: (deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
-  deleteDeadline: (deadlineId: number, cancelToken: CancelTokenSource) => void
-  createFile: (deadlineId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  editFile: (deadlineId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteFile: (deadlineId: number, fileId: number, cancelToken: CancelTokenSource) => void
+  editDeadline: (deadlineId: number, values: Record<string, string>, callback: () => void) => void
+  deleteDeadline: (deadlineId: number, callback: () => void) => void
+  createFile: (deadlineId: number, values: Record<string, unknown>, callback: () => void) => void
+  editFile: (deadlineId: number, fileId: number, values: Record<string, unknown>, callback: () => void) => void
+  deleteFile: (deadlineId: number, fileId: number, callback: () => void) => void
 }
 
 const useStyles = createStyles((theme) => ({
@@ -99,21 +98,18 @@ function DeadlineItem({
       })
     },
     onClose: () => {
-      axiosCancelToken.cancel()
       setFormLoading(false)
     }
   })
 
   const [isDeleteDeadlineOpened, deleteDeadlineHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       setFormLoading(false)
     }
   })
 
   const [isCreateFileOpened, createFileHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       createFileForm.setValues({
         name: '',
         in_folder: '',
@@ -193,8 +189,6 @@ function DeadlineItem({
     }
   })
 
-  const axiosCancelToken = axios.CancelToken.source()
-
   function handleEditDeadline(e: React.FormEvent) {
     e.preventDefault()
 
@@ -212,10 +206,8 @@ function DeadlineItem({
         begin: dayjs(values.startDate).hour(values.startTime.getHours()).minute(values.startTime.getMinutes()).toISOString(),
         end: dayjs(values.endDate).hour(values.endTime.getHours()).minute(values.endTime.getMinutes()).toISOString()
       },
-      axiosCancelToken
+      editDeadlineHandler.close
     )
-
-    editDeadlineHandler.close()
   }
 
   function handleDeleteDeadline(e: React.FormEvent) {
@@ -223,9 +215,7 @@ function DeadlineItem({
 
     setFormLoading(true)
 
-    deleteDeadline(id, axiosCancelToken)
-
-    setFormLoading(false)
+    deleteDeadline(id, () => setFormLoading(false))
   }
 
   function handleCreateFile(e: React.FormEvent) {
@@ -234,17 +224,15 @@ function DeadlineItem({
     const { hasErrors } = createFileForm.validate()
     if (hasErrors) return
 
-    createFile(id, createFileForm.values, axiosCancelToken)
-
-    createFileHandler.close()
+    createFile(id, createFileForm.values, createFileHandler.close)
   }
 
-  function handleEditFile(fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) {
-    editFile(id, fileId, values, cancelToken)
+  function handleEditFile(fileId: number, values: Record<string, unknown>, callback: () => void) {
+    editFile(id, fileId, values, callback)
   }
 
-  function handleDeleteDeadlineFile(fileId: number, cancelToken: CancelTokenSource) {
-    deleteFile(id, fileId, cancelToken)
+  function handleDeleteDeadlineFile(fileId: number, callback: () => void) {
+    deleteFile(id, fileId, callback)
   }
 
   if (user?.is_lecturer) {

@@ -78,9 +78,7 @@ cd Web-Application-Project
   - Active environment
 
     ```bash
-    .venv\Scripts\Activate.ps1 # Powershell
-    .venv\Scripts\activate.bat # Command Prompt
-    .venv\Scripts\activate # Unix
+    .venv\Scripts\activate
     ```
 
   - Install dependencies

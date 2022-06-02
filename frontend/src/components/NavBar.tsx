@@ -7,6 +7,7 @@ import { useTokenStore, useUserStore } from '@/stores'
 import { useAxiosInstance } from '@/hooks'
 import { api } from '@/constants'
 import { showNotification } from '@mantine/notifications'
+import SearchBox from './SearchBox'
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -29,6 +30,12 @@ const useStyles = createStyles((theme) => ({
 
   logo: {
     width: '3.5rem'
+  },
+
+  left: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem'
   },
 
   right: {
@@ -68,32 +75,44 @@ function NavBar(): JSX.Element {
       )
   }
 
+  if (user === undefined) return <></>
+
   return (
     <div className={classes.wrapper}>
       <div className={classes.container}>
-        <Link to="/">
-          <Logo className={classes.logo} />
-        </Link>
+        <div className={classes.left}>
+          <Link to="/">
+            <Logo className={classes.logo} />
+          </Link>
+          <SearchBox />
+        </div>
         <div className={classes.right}>
           <ThemeButton />
-
-          {user && (
-            <Menu
-              control={
-                <Tooltip label={user.name}>
-                  <Avatar radius="xl" src={user.image} style={{ cursor: 'pointer' }} />
-                </Tooltip>
-              }
-            >
-              <Menu.Item>{user.name}</Menu.Item>
-              <Divider />
-              <Menu.Item>Your profile</Menu.Item>
-              <Menu.Item>Your course</Menu.Item>
-              <Menu.Item>Your deadlines</Menu.Item>
-              <Divider />
-              <Menu.Item onClick={handleSignOut}>Sign out</Menu.Item>
-            </Menu>
-          )}
+          <Menu
+            control={
+              <Tooltip label={user.name}>
+                <Avatar radius="xl" src={user.image} style={{ cursor: 'pointer' }} />
+              </Tooltip>
+            }
+          >
+            <Menu.Item component={Link} to={`/user`}>
+              {user.name}
+            </Menu.Item>
+            <Divider />
+            <Menu.Item component={Link} to={`/user`}>
+              Your profile
+            </Menu.Item>
+            <Menu.Item component={Link} to={`/user/courses`}>
+              Your course
+            </Menu.Item>
+            {!user.is_lecturer && (
+              <Menu.Item component={Link} to={`/user/deadlines`}>
+                Your deadlines
+              </Menu.Item>
+            )}
+            <Divider />
+            <Menu.Item onClick={handleSignOut}>Sign out</Menu.Item>
+          </Menu>
         </div>
       </div>
     </div>

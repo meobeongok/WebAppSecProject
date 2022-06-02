@@ -6,7 +6,6 @@ import ButtonGroup from './ButtonGroup'
 import LocationTreeView from './LocationTreeview'
 import { useEdit } from '@/contexts'
 import { useForm } from '@mantine/form'
-import axios, { type CancelTokenSource } from 'axios'
 import { useDisclosure } from '@mantine/hooks'
 import FileInput from './FileInput'
 import DeadlineItem from './DeadlineItem'
@@ -15,17 +14,17 @@ import dayjs from 'dayjs'
 
 interface LessonItemProps {
   lesson: Lesson
-  editLesson: (lessonId: number, cancelToken: CancelTokenSource, values: Record<string, string>) => void
-  deleteLesson: (lessonId: number, cancelToken: CancelTokenSource) => void
-  createFile: (lessonId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  editFile: (lessonId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteFile: (lessonId: number, fileId: number, cancelToken: CancelTokenSource) => void
-  createDeadline: (lessonId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
-  editDeadline: (lessonId: number, deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource) => void
-  deleteDeadline: (lessonId: number, deadlineId: number, cancelToken: CancelTokenSource) => void
-  createDeadlineFile: (lessonId: number, deadlineId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  editDeadlineFile: (lessonId: number, deadlineId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) => void
-  deleteDeadlineFile: (lessonId: number, deadlineId: number, fileId: number, cancelToken: CancelTokenSource) => void
+  editLesson: (lessonId: number, values: Record<string, string>, callback: () => void) => void
+  deleteLesson: (lessonId: number, callback: () => void) => void
+  createFile: (lessonId: number, values: Record<string, unknown>, callback: () => void) => void
+  editFile: (lessonId: number, fileId: number, values: Record<string, unknown>, callback: () => void) => void
+  deleteFile: (lessonId: number, fileId: number, callback: () => void) => void
+  createDeadline: (lessonId: number, values: Record<string, string>, callback: () => void) => void
+  editDeadline: (lessonId: number, deadlineId: number, values: Record<string, string>, callback: () => void) => void
+  deleteDeadline: (lessonId: number, deadlineId: number, callback: () => void) => void
+  createDeadlineFile: (lessonId: number, deadlineId: number, values: Record<string, unknown>, callback: () => void) => void
+  editDeadlineFile: (lessonId: number, deadlineId: number, fileId: number, values: Record<string, unknown>, callback: () => void) => void
+  deleteDeadlineFile: (lessonId: number, deadlineId: number, fileId: number, callback: () => void) => void
 }
 
 const useStyles = createStyles((theme) => ({
@@ -100,7 +99,6 @@ function LessonItem({
 
   const [isEditLessonOpened, editLessonHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       editLessonForm.setValues({
         name,
         description
@@ -111,14 +109,12 @@ function LessonItem({
 
   const [isDeleteLessonOpened, deleteLessonHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       setFormLoading(false)
     }
   })
 
   const [isCreateFileOpened, createFileHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       createFileForm.setValues({
         name: '',
         in_folder: '',
@@ -140,8 +136,6 @@ function LessonItem({
       })
     },
     onClose: () => {
-      axiosCancelToken.cancel()
-
       setFormLoading(false)
     }
   })
@@ -226,8 +220,6 @@ function LessonItem({
     }
   })
 
-  const axiosCancelToken = axios.CancelToken.source()
-
   function handleEditLesson(e: React.FormEvent): void {
     e.preventDefault()
 
@@ -235,9 +227,7 @@ function LessonItem({
     if (hasErrors) return
 
     setFormLoading(true)
-    editLesson(id, axiosCancelToken, editLessonForm.values)
-
-    editLessonHandler.close()
+    editLesson(id, editLessonForm.values, editLessonHandler.close)
   }
 
   function handleDeleteLesson(e: React.FormEvent): void {
@@ -245,9 +235,7 @@ function LessonItem({
 
     setFormLoading(true)
 
-    deleteLesson(id, axiosCancelToken)
-
-    deleteLessonHandler.close()
+    deleteLesson(id, deleteLessonHandler.close)
   }
 
   function handleCreateFile(e: React.FormEvent): void {
@@ -258,17 +246,15 @@ function LessonItem({
 
     setFormLoading(true)
 
-    createFile(id, createFileForm.values, axiosCancelToken)
-
-    createFileHandler.close()
+    createFile(id, createFileForm.values, createFileHandler.close)
   }
 
-  function handleEditFile(fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource): void {
-    editFile(id, fileId, values, cancelToken)
+  function handleEditFile(fileId: number, values: Record<string, unknown>, callback: () => void): void {
+    editFile(id, fileId, values, callback)
   }
 
-  function handleDeleteFile(fileId: number, cancelToken: CancelTokenSource): void {
-    deleteFile(id, fileId, cancelToken)
+  function handleDeleteFile(fileId: number, callback: () => void): void {
+    deleteFile(id, fileId, callback)
   }
 
   function handleCreateDeadline(e: React.FormEvent) {
@@ -288,30 +274,28 @@ function LessonItem({
         begin: dayjs(values.startDate).hour(values.startTime.getHours()).minute(values.startTime.getMinutes()).toISOString(),
         end: dayjs(values.endDate).hour(values.endTime.getHours()).minute(values.endTime.getMinutes()).toISOString()
       },
-      axiosCancelToken
+      createDeadlineHandler.close
     )
-
-    createDeadlineHandler.close()
   }
 
-  function handleEditDeadline(deadlineId: number, values: Record<string, string>, cancelToken: CancelTokenSource) {
-    editDeadline(id, deadlineId, values, cancelToken)
+  function handleEditDeadline(deadlineId: number, values: Record<string, string>, callback: () => void) {
+    editDeadline(id, deadlineId, values, callback)
   }
 
-  function handleDeleteDeadline(deadlineId: number, cancelToken: CancelTokenSource) {
-    deleteDeadline(id, deadlineId, cancelToken)
+  function handleDeleteDeadline(deadlineId: number, callback: () => void) {
+    deleteDeadline(id, deadlineId, callback)
   }
 
-  function handleCreateDeadlineFile(deadlineId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource): void {
-    createDeadlineFile(id, deadlineId, values, cancelToken)
+  function handleCreateDeadlineFile(deadlineId: number, values: Record<string, unknown>, callback: () => void): void {
+    createDeadlineFile(id, deadlineId, values, callback)
   }
 
-  function handleEditDeadlineFile(deadlineId: number, fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource): void {
-    editDeadlineFile(id, deadlineId, fileId, values, cancelToken)
+  function handleEditDeadlineFile(deadlineId: number, fileId: number, values: Record<string, unknown>, callback: () => void): void {
+    editDeadlineFile(id, deadlineId, fileId, values, callback)
   }
 
-  function handleDeleteDeadlineFile(deadlineId: number, fileId: number, cancelToken: CancelTokenSource): void {
-    deleteDeadlineFile(id, deadlineId, fileId, cancelToken)
+  function handleDeleteDeadlineFile(deadlineId: number, fileId: number, callback: () => void): void {
+    deleteDeadlineFile(id, deadlineId, fileId, callback)
   }
 
   return (

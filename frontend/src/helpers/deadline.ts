@@ -1,4 +1,4 @@
-import type { DeadlineSubmit, LocationItem } from '@/types'
+import type { Deadline, DeadlineSubmit, LocationItem } from '@/types'
 import { Folder } from '@/types'
 import { sortLocationItems } from './location'
 
@@ -56,4 +56,18 @@ function deleteSubmitFileDeadline(deadline: DeadlineSubmit | undefined, fileId: 
   return Object.create(deadline)
 }
 
-export { addSubmitFileDeadline, deleteSubmitFileDeadline }
+function addCourseAndLessonNameToDeadline(deadlines: Deadline[], courseName: string, lessonName: string, courseId: number): Deadline[] {
+  const newDeadlines: Deadline[] = []
+  for (let i = 0; i < deadlines.length; i++) {
+    newDeadlines.push({
+      ...deadlines[i],
+      courseName: courseName,
+      lessonName: lessonName,
+      courseId
+    })
+  }
+
+  return newDeadlines
+}
+
+export { addSubmitFileDeadline, deleteSubmitFileDeadline, addCourseAndLessonNameToDeadline }

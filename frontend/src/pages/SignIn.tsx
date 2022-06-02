@@ -39,10 +39,8 @@ const useStyles = createStyles((theme) => ({
     maxWidth: '40rem',
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: '1.5rem',
     display: 'flex',
-    flexDirection: 'column',
-    gap: '1.5rem'
+    flexDirection: 'column'
   },
 
   paper: {
@@ -123,7 +121,7 @@ function Login(): JSX.Element {
       .post<TokenPayload>(api.signIn, form.values)
       .then(({ data }) => {
         setCurrentStatus({ title: 'Signed in', description: 'Please wait... 😘', color: 'blue' })
-        setTimeout(() => setAccessToken(data.access), 1500)
+        setTimeout(() => setAccessToken(data.access), 500)
       })
       .catch((error: AxiosError) => {
         if (error.response && error.response.status === 401) {
@@ -198,6 +196,7 @@ function Login(): JSX.Element {
                   id="email"
                   icon={<FiAtSign />}
                   placeholder="Your email"
+                  disabled={isLoading}
                   {...form.getInputProps('email')}
                 />
                 <PasswordInput
@@ -208,6 +207,7 @@ function Login(): JSX.Element {
                   placeholder="Your password"
                   icon={<FiLock />}
                   toggleTabIndex={0}
+                  disabled={isLoading}
                   {...form.getInputProps('password')}
                 />
                 <Button className={classes.signInButton} type="submit" loading={isLoading}>

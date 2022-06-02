@@ -32,11 +32,13 @@ function CourseStudent(): JSX.Element {
 
   React.useEffect(() => {
     async function getStudents(): Promise<void> {
-      await axiosInstance.get<User[]>(`${api.courses}${courseId}/listMember/`).then(({ data }) => {
-        setStudents(data)
-      })
-
-      setLoading(false)
+      await axiosInstance
+        .get<User[]>(`${api.courses}${courseId}/listMember/`)
+        .then(({ data }) => {
+          setStudents(data)
+        })
+        .catch()
+        .then(() => setLoading(false))
     }
 
     getStudents()

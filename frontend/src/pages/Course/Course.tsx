@@ -9,7 +9,6 @@ import { useEdit } from '@/contexts'
 import { FiEdit } from 'react-icons/fi'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
-import axios from 'axios'
 import { useDisclosure } from '@mantine/hooks'
 
 const useStyles = createStyles((theme) => ({
@@ -111,7 +110,6 @@ function CoursePage(): JSX.Element {
   const [isFormSubmitting, setFormSubmitting] = React.useState<boolean>(false)
   const [isCourseEditOpened, courseEditHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       if (course !== undefined) {
         editCourseForm.setValues({
           mskh: course.mskh,
@@ -122,8 +120,6 @@ function CoursePage(): JSX.Element {
       setFormSubmitting(false)
     }
   })
-
-  const axiosCancelToken = axios.CancelToken.source()
 
   const editCourseForm = useForm({
     initialValues: {
@@ -149,7 +145,7 @@ function CoursePage(): JSX.Element {
     setFormSubmitting(true)
 
     axiosInstance
-      .put<Course>(`${api.courses}${courseId}/`, { ...editCourseForm.values, cancelToken: axiosCancelToken.token })
+      .put<Course>(`${api.courses}${courseId}/`, { ...editCourseForm.values })
       .then(({ data }) => {
         setCourse(data)
         setPageTitle(data.name)
@@ -166,8 +162,7 @@ function CoursePage(): JSX.Element {
           message: 'Please try again'
         })
       )
-
-    courseEditHandler.close()
+      .then(() => courseEditHandler.close())
   }
 
   usePageTitle(pageTitle)
@@ -183,8 +178,7 @@ function CoursePage(): JSX.Element {
         .catch(() => {
           setPageTitle('Course not found')
         })
-
-      setLoading(false)
+        .then(() => setLoading(false))
     }
 
     getCourse()

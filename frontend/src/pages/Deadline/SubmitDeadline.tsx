@@ -5,12 +5,10 @@ import { useUserStore } from '@/stores'
 import type { DeadlineSubmit, DeadlineSubmitPayload, File as DeadlineFile } from '@/types'
 import { Center, createStyles, Loader, Title, Text, Card, Divider, Button, Modal, TextInput, LoadingOverlay } from '@mantine/core'
 import * as React from 'react'
-import { useParams } from 'react-router-dom'
+import { matchRoutes, useLocation, useParams } from 'react-router-dom'
 import classnames from 'clsx'
 import { showNotification } from '@mantine/notifications'
-import type { CancelTokenSource } from 'axios'
 import { useDisclosure } from '@mantine/hooks'
-import axios from 'axios'
 import { useForm } from '@mantine/form'
 import { useEdit } from '@/contexts'
 
@@ -115,11 +113,12 @@ function SubmitDeadline(): JSX.Element {
   const lessonId = Number(lessonIdStr)
   const submitId = Number(submitIdStr)
 
+  const location = useLocation()
+
   const { setInEditingMode } = useEdit()
 
   const [isCreateFileOpened, createFileHandler] = useDisclosure(false, {
     onClose: () => {
-      axiosCancelToken.cancel()
       createFileForm.setValues({
         name: '',
         in_folder: '',
@@ -140,8 +139,6 @@ function SubmitDeadline(): JSX.Element {
       setFormLoading(false)
     }
   })
-
-  const axiosCancelToken = axios.CancelToken.source()
 
   const createFileForm = useForm<{
     name: string
@@ -175,10 +172,7 @@ function SubmitDeadline(): JSX.Element {
     axiosInstance
       .post<DeadlineFile>(
         `/deadlineAPI/${lessonId}/studentDeadlines/${submitDeadline?.id}/files/`,
-        {
-          ...createFileForm.values,
-          cancelToken: axiosCancelToken.token
-        },
+        { ...createFileForm.values },
         {
           headers: {
             'content-type': 'multipart/form-data'
@@ -199,18 +193,14 @@ function SubmitDeadline(): JSX.Element {
           message: 'Please try again'
         })
       })
-
-    createFileHandler.close()
+      .then(() => createFileHandler.close())
   }
 
-  function handleEditDeadlineFile(fileId: number, values: Record<string, unknown>, cancelToken: CancelTokenSource) {
+  function handleEditDeadlineFile(fileId: number, values: Record<string, unknown>, callback: () => void) {
     axiosInstance
       .put<DeadlineFile>(
         `/deadlineAPI/${lessonId}/studentDeadlines/${submitDeadline?.id}/files/${fileId}/`,
-        {
-          ...values,
-          cancelToken: cancelToken.token
-        },
+        { ...values },
         {
           headers: {
             'content-type': 'multipart/form-data'
@@ -234,13 +224,12 @@ function SubmitDeadline(): JSX.Element {
           message: 'Please try again'
         })
       })
+      .then(() => callback())
   }
 
-  function handleDeleteDeadlineFile(fileId: number, cancelToken: CancelTokenSource) {
+  function handleDeleteDeadlineFile(fileId: number, callback: () => void) {
     axiosInstance
-      .delete(`/deadlineAPI/${lessonId}/studentDeadlines/${submitDeadline?.id}/files/${fileId}/`, {
-        cancelToken: cancelToken.token
-      })
+      .delete(`/deadlineAPI/${lessonId}/studentDeadlines/${submitDeadline?.id}/files/${fileId}/`)
       .then(() => {
         setSubmitDeadline((previousValue) => deleteSubmitFileDeadline(previousValue, fileId, true))
         showNotification({
@@ -255,6 +244,7 @@ function SubmitDeadline(): JSX.Element {
           message: 'Please try again'
         })
       })
+      .then(() => callback())
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -268,11 +258,7 @@ function SubmitDeadline(): JSX.Element {
       })
     } else {
       axiosInstance
-        .put<DeadlineSubmitPayload>(
-          `/deadlineAPI/${lessonId}/studentDeadlines/${submitDeadline?.id}/submit/`,
-          {},
-          { cancelToken: axiosCancelToken.token }
-        )
+        .put<DeadlineSubmitPayload>(`/deadlineAPI/${lessonId}/studentDeadlines/${submitDeadline?.id}/submit/`, {})
         .then(({ data }) => {
           const newData = {
             ...data,
@@ -297,20 +283,15 @@ function SubmitDeadline(): JSX.Element {
             message: 'Please try again'
           })
         })
+        .then(() => submitDeadlineHandler.close())
     }
-
-    submitDeadlineHandler.close()
   }
 
   function handleUnsubmit(e: React.FormEvent) {
     e.preventDefault()
 
     axiosInstance
-      .put<DeadlineSubmitPayload>(
-        `/deadlineAPI/${lessonId}/studentDeadlines/${submitDeadline?.id}/unsubmit/`,
-        {},
-        { cancelToken: axiosCancelToken.token }
-      )
+      .put<DeadlineSubmitPayload>(`/deadlineAPI/${lessonId}/studentDeadlines/${submitDeadline?.id}/unsubmit/`, {})
       .then(({ data }) => {
         const newData = {
           ...data,
@@ -335,22 +316,20 @@ function SubmitDeadline(): JSX.Element {
           message: 'Please try again'
         })
       })
-
-    unsubmitDeadlineHandler.close()
+      .then(() => unsubmitDeadlineHandler.close())
   }
 
   function handleSubmitClose() {
     submitDeadlineHandler.close()
-    axiosCancelToken.cancel()
   }
 
   function handleUnsubmitClose() {
     unsubmitDeadlineHandler.close()
-    axiosCancelToken.cancel()
   }
 
   React.useEffect(() => {
     if (user === undefined || user.is_lecturer) return
+    if (!matchRoutes([{ path: '/courses/:courseId/lessons/:lessonId/submitdeadline/:submitId' }], location.pathname)) return
 
     async function getSubmitDeadline() {
       axiosInstance
@@ -366,21 +345,19 @@ function SubmitDeadline(): JSX.Element {
           }
 
           setSubmitDeadline(newData)
-          setLoading(false)
         })
-        .catch(() => {
-          setLoading(false)
-        })
+        .catch()
+        .then(() => setLoading(false))
     }
 
     getSubmitDeadline()
-  }, [user])
+  }, [user, location.pathname])
 
   React.useEffect(() => {
     if (!submitDeadline) return
 
-    setInEditingMode(!submitDeadline.is_finished)
-  }, [submitDeadline])
+    setInEditingMode(!submitDeadline.is_finished && !isOverDue)
+  }, [submitDeadline, isOverDue])
 
   if (isLoading) {
     return (
@@ -424,7 +401,7 @@ function SubmitDeadline(): JSX.Element {
                 submitDeadline.deadline.end
               ).toLocaleTimeString()}`}</Text>
               <Text className={classnames('submit-child', classes.headerItem)}>Finish at</Text>
-              <Text className="submit-child">{submitDeadline.finish_at ?? 'None'}</Text>
+              <Text className="submit-child">{submitDeadline.finish_at ? new Date(submitDeadline.finish_at).toLocaleString() : 'None'}</Text>
             </div>
           </Card>
           <Card className={classes.submitFileContainer}>
@@ -444,9 +421,11 @@ function SubmitDeadline(): JSX.Element {
               <>
                 <Divider mx="md" my="sm" />
                 <div className={classes.submitButtons}>
-                  <Button variant="outline" onClick={createFileHandler.open}>
-                    Add file
-                  </Button>
+                  {!submitDeadline.is_finished && (
+                    <Button variant="outline" onClick={createFileHandler.open}>
+                      Add file
+                    </Button>
+                  )}
                   {submitDeadline.is_finished ? (
                     <Button color="red" onClick={unsubmitDeadlineHandler.open}>
                       Unsubmit

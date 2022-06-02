@@ -103,20 +103,20 @@ function SearchBox(): JSX.Element {
   const axiosInstance = useAxiosInstance()
 
   function search(value: string) {
+    const unUnicodeValue = removeVietnameseTones(value.toLowerCase())
+
     if (courses) {
-      let filtered = courses.filter((course) => removeVietnameseTones(course.name.toLowerCase()).includes(removeVietnameseTones(value.toLowerCase())))
+      let filtered = courses.filter((course) => removeVietnameseTones(course.name.toLowerCase()).includes(unUnicodeValue))
       if (filtered.length > 4) filtered = filtered.slice(0, 3)
       setFilteredCourses(filtered)
     }
     if (lessons) {
-      let filtered = lessons.filter((lesson) => removeVietnameseTones(lesson.name.toLowerCase()).includes(removeVietnameseTones(value.toLowerCase())))
+      let filtered = lessons.filter((lesson) => removeVietnameseTones(lesson.name.toLowerCase()).includes(unUnicodeValue))
       if (filtered.length > 4) filtered = filtered.slice(0, 3)
       setFilteredLessons(filtered)
     }
     if (deadlines) {
-      let filtered = deadlines.filter((deadline) =>
-        removeVietnameseTones(deadline.name.toLowerCase()).includes(removeVietnameseTones(value.toLowerCase()))
-      )
+      let filtered = deadlines.filter((deadline) => removeVietnameseTones(deadline.name.toLowerCase()).includes(unUnicodeValue))
       if (filtered.length > 4) filtered = filtered.slice(0, 3)
       setFilteredDeadlines(filtered)
     }

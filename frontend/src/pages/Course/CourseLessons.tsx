@@ -514,7 +514,33 @@ function CourseLessons(): JSX.Element {
     )
   }
 
-  return <Center>This course has no lesson (￣ε(#￣)</Center>
+  return (
+    <div>
+      {isInEditingMode && (
+        <Tooltip label="Create a lesson" style={{ width: '100%' }}>
+          <Card className={classes.addLesson} onClick={createLessonHandler.open}>
+            <Center>
+              <FiPlus />
+            </Center>
+          </Card>
+        </Tooltip>
+      )}
+      <Center>This course has no lesson (￣ε(#￣)</Center>
+      <Modal title="Create a new lesson" centered opened={isCreateLessonOpened} onClose={createLessonHandler.close}>
+        <form className={classes.form} onSubmit={handleCreateLesson}>
+          <TextInput required label="Lesson name" {...createLessonForm.getInputProps('name')} />
+          <TextInput label="Lesson description" {...createLessonForm.getInputProps('description')} />
+          <div className={classes.formButton}>
+            <Button variant="outline" color="red" onClick={createLessonHandler.close}>
+              Cancel
+            </Button>
+            <Button type="submit">Create</Button>
+          </div>
+        </form>
+        <LoadingOverlay visible={isFormSubmitting} />
+      </Modal>
+    </div>
+  )
 }
 
 export default CourseLessons

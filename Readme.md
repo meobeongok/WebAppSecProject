@@ -1,7 +1,5 @@
 # WebAppSecProject - Alunno
 
-**WIP btw 🐧🐧🐧**
-
 ## What is Alunno?
 
 Alunno is a web-based course management application for WebAppSec course which uses [Django](https://www.djangoproject.com) and [React](https://reactjs.org).

@@ -1,7 +1,7 @@
 import type { MantineThemeOverride } from '@mantine/core'
 
 const overrideTheme: MantineThemeOverride = {
-  fontFamily: '"Cabin", "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, "ui-sans-serif", sans-serif',
+  fontFamily: '"Lexend Deca", "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, "ui-sans-serif", sans-serif',
   fontFamilyMonospace: '"Cascadia Code", "Fira Code", SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", ui-monospace, monospace',
   lineHeight: 'calc(1em + 0.5rem)',
 

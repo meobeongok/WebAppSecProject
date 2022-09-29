@@ -2,8 +2,8 @@ import * as React from 'react'
 import { useAxiosInstance, usePageTitle } from '@/hooks'
 import { useForm } from '@mantine/form'
 import { Logo } from '@/components'
-import { FiAlertTriangle, FiAtSign, FiLock } from 'react-icons/fi'
-import { Alert, Anchor, Button, createStyles, LoadingOverlay, Paper, PasswordInput, TextInput, Title } from '@mantine/core'
+import { FiAlertTriangle, FiAtSign, FiLock, FiGithub } from 'react-icons/fi'
+import { Alert, Anchor, Button, createStyles, LoadingOverlay, Paper, PasswordInput, TextInput, Title, Text } from '@mantine/core'
 import { api } from '@/constants'
 import { useTokenStore } from '@/stores'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -62,7 +62,22 @@ const useStyles = createStyles((theme) => ({
   },
 
   signUp: {
-    textAlign: 'center'
+    textAlign: 'center',
+    marginTop: '1em'
+  },
+
+  creditOuter: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: '1em',
+    gap: '0.5em'
+  },
+
+  credit: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.25em'
   }
 }))
 
@@ -218,6 +233,13 @@ function Login(): JSX.Element {
             <Anchor className={classes.signUp} component={Link} to="/signup">
               Don't have an account? Sign up 😘
             </Anchor>
+            <Text className={classes.creditOuter}>
+              Make with ❤️ by{' '}
+              <Anchor className={classes.credit} target="_blank" rel="nofollow noopener noreferrer" href="https://github.com/pinanek23">
+                <FiGithub />
+                <span>pinanek23</span>
+              </Anchor>
+            </Text>
           </div>
         </div>
       </div>

@@ -75,9 +75,17 @@ cd Web-Application-Project
 
   - Active environment
 
-    ```bash
-    .venv\Scripts\activate
-    ```
+    - Windows
+    
+      ```bash
+      .venv\Scripts\activate
+      ```
+    
+    - Linux
+    
+      ```bash
+      .venv\bin\activate
+      ```
 
   - Install dependencies
 
@@ -175,11 +183,9 @@ cd Web-Application-Project
     POSTGRES_PASSWORD=k&432postgres
     ```
 
-- Run
+- Run: In repo folder, run command:
 
-  In Web-Application-Project folder, run command:
-
-  ```
+  ```bash
   docker-compose up
   ```
 
@@ -197,7 +203,7 @@ cd Web-Application-Project
   - [React](https://reactjs.org)
   - [Mantine](https://mantine.dev)
 
-- Deploy
+- Deployment
 
   - [docker](https://www.docker.com/)
   - [nginx](https://www.nginx.com/)

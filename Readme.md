@@ -145,13 +145,15 @@ cd Web-Application-Project
 
     ```
     DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+    DJANGO_CORS_ALLOWED_ORIGINS=http://localhost http://127.0.0.1:3000
+    DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost http://127.0.0.1
     DJANGO_SECRET_KEY=k=ke$8gp0x88=&$p9_r328jn@*j1y^rz+f81s5wv@a=)8(yuc@
     DJANGO_DEBUG=False
 
     # auto create a superuser if CREATE_ADMIN=True
     CREATE_ADMIN=True
-    ADMIN_CODE=123456
-    ADMIN_PASSWORD=123456
+    ADMIN_CODE=AD1010
+    ADMIN_PASSWORD=SS4p3rS3cr3tp@ssw0rd!!!
     ADMIN_USERNAME=admin
     ADMIN_EMAIL=admin@admin.com
 

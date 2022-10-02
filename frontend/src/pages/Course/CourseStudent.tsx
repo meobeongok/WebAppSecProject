@@ -59,7 +59,7 @@ function CourseStudent(): JSX.Element {
         <Card className={classes.container}>
           {students.map((student) => (
             <div className={classes.student} key={student.id}>
-              <Avatar radius="xl" size="sm" src={student.image && import.meta.env.VITE_MEDIA_URL + student.image} />
+              <Avatar radius="xl" size="sm" src={student.image && (import.meta.env.VITE_MEDIA_URL ?? document.domain) + student.image} />
               <Text>{student.name}</Text>
             </div>
           ))}

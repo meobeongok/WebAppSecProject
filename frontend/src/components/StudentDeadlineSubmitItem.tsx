@@ -39,7 +39,7 @@ function StudentDeadlineSubmitItem({
   return (
     <Card className={classes.container} shadow="xs" radius="md">
       <div className={classes.title}>
-        <Avatar src={import.meta.env.VITE_MEDIA_URL + member.image} radius="xl" />
+        <Avatar src={import.meta.env.VITE_MEDIA_URL ?? document.domain + member.image} radius="xl" />
         <Text>{member.name}</Text>
       </div>
       <Text>

@@ -145,6 +145,8 @@ cd Web-Application-Project
 
     ```
     DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+    DJANGO_CORS_ALLOWED_ORIGINS=http://localhost http://127.0.0.1:3000
+    DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost http://127.0.0.1
     DJANGO_SECRET_KEY=k=ke$8gp0x88=&$p9_r328jn@*j1y^rz+f81s5wv@a=)8(yuc@
     DJANGO_DEBUG=False
 

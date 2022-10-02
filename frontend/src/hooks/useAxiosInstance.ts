@@ -32,7 +32,7 @@ function useAxiosInstance() {
         try {
           if (error.status !== '401') return Promise.reject(error)
 
-          const data = await axios.post<TokenPayload>(import.meta.env.VITE_BACKEND_URL + api.refresh).then(({ data }) => data)
+          const data = await axios.post<TokenPayload>(import.meta.env.VITE_BACKEND_URL ?? (document.domain + '/api/') + api.refresh).then(({ data }) => data)
           setAccessToken(data.access)
 
           // Resend request

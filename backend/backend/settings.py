@@ -68,7 +68,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    #"django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -132,15 +132,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 CORS_ALLOWED_ORIGINS = os.environ.get("DJANGO_CORS_ALLOWED_ORIGINS", "http://localhost http://127.0.0.1:3000").split(" ")
 
-CSRF_TRUSTED_ORIGINS = os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost http://127.0.0.1").split(" ")
+#CSRF_TRUSTED_ORIGINS = os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost http://127.0.0.1").split(" ")
 
-CSRF_COOKIE_SECURE = True
+#CSRF_COOKIE_SECURE = True
 
 SESSION_COOKIE_SECURE = True
 
 CORS_ALLOW_CREDENTIALS = True
 
-HTTP_ONLY_COOKIE = True
+#HTTP_ONLY_COOKIE = True
 
 SAME_SITE = "strict"
 

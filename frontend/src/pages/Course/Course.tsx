@@ -238,7 +238,7 @@ function CoursePage(): JSX.Element {
                   <Text className={classes.infoHeader}>Lecturers</Text>
                   {course.course_lecturer.map((lecturer) => (
                     <div className={`${classes.lecturer} ${classes.infoItem}`} key={lecturer.id}>
-                      <Avatar radius="xl" size="sm" src={lecturer.image && import.meta.env.VITE_MEDIA_URL + lecturer.image} />
+                      <Avatar radius="xl" size="sm" src={lecturer.image && (import.meta.env.VITE_MEDIA_URL ?? document.domain) + lecturer.image} />
                       <Text>{lecturer.name}</Text>
                     </div>
                   ))}

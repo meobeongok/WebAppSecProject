@@ -265,7 +265,7 @@ function LocationTreeItem({
   function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>) {
     e.preventDefault()
 
-    const url = import.meta.env.VITE_MEDIA_URL ?? document.domain + fileUrl
+    const url = import.meta.env.VITE_MEDIA_URL + fileUrl
 
     axios
       .get(url, {
@@ -306,7 +306,7 @@ function LocationTreeItem({
                 <Text>{name}</Text>
               ) : (
                 <>
-                  <Anchor href={import.meta.env.VITE_MEDIA_URL ?? document.domain + fileUrl} onClick={handleAnchorClick} className={classes.anchor}>
+                  <Anchor href={import.meta.env.VITE_MEDIA_URL + fileUrl} onClick={handleAnchorClick} className={classes.anchor}>
                     {name}
                   </Anchor>
                   {isInEditingMode && itemType === 'lesson' && (

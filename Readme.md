@@ -152,8 +152,8 @@ cd Web-Application-Project
 
     # auto create a superuser if CREATE_ADMIN=True
     CREATE_ADMIN=True
-    ADMIN_CODE=123456
-    ADMIN_PASSWORD=123456
+    ADMIN_CODE=AD1010
+    ADMIN_PASSWORD=SS4p3rS3cr3tp@ssw0rd!!!
     ADMIN_USERNAME=admin
     ADMIN_EMAIL=admin@admin.com
 
